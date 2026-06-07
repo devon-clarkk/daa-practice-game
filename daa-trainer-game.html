@@ -790,10 +790,18 @@ input[type=text]::placeholder,input[type=number]::placeholder{color:var(--text3)
       <div><label>Pattern P</label><input type="text" id="rk-pattern" placeholder="26" style="width:100px;"></div>
       <div><label>Radix d</label><input type="number" id="rk-d" value="10" style="width:70px;"></div>
       <div><label>Prime q</label><input type="number" id="rk-q" value="11" style="width:70px;"></div>
+      <div>
+        <label>Encoding</label>
+        <div style="display:flex;gap:4px;margin-top:4px;">
+          <button class="btn" id="rk-enc-ascii" onclick="rkSetEncoding('ascii')" style="padding:5px 10px;font-size:.78rem;border-color:var(--accent);color:var(--accent);background:var(--accent-dim);">ASCII</button>
+          <button class="btn" id="rk-enc-alpha" onclick="rkSetEncoding('alpha')" style="padding:5px 10px;font-size:.78rem;">A=1</button>
+        </div>
+      </div>
       <button class="btn btn-primary" onclick="rkLoad()" style="align-self:flex-end;">Load</button>
       <button class="btn" onclick="rkReset()" style="align-self:flex-end;">Reset</button>
     </div>
   </div>
+  <div id="rk-enc-display" style="display:none;font-family:var(--mono);font-size:.75rem;color:var(--text3);margin-bottom:.75rem;padding:6px 12px;background:var(--bg3);border-radius:6px;border:1px solid var(--border);"></div>
   <div class="grid2">
     <div><div class="panel">
       <div class="panel-title">Step-by-step computation</div>
@@ -1466,14 +1474,35 @@ function recurCheck(){if(!recurQ)return;const ans=document.getElementById('recur
 function recurCheckComplexity(){if(!recurQ)return;const ans=document.getElementById('recur-complexity').value.trim();const ok=complexEq(ans,recurQ.complexity)||complexEq(ans,recurQ.complexity.replace('Θ','O').replace('θ','O'));if(ok){recurCorrect++;document.getElementById('recur-correct').textContent=recurCorrect;setFB('recur-complex-fb','ok','✓ Correct! T(n) = '+recurQ.complexity);if(examActive)examTaskDone();}else{setFB('recur-complex-fb','err','✗ Expected: '+recurQ.complexity+'. Hint: '+recurQ.hint);}}
 
 // ═══════════════════════════════════════════════════ RABIN-KARP
-let rkData=null,rkStep=0,rkSteps=[];
-function rkLoad(){const T=document.getElementById('rk-text').value.trim();const P=document.getElementById('rk-pattern').value.trim();const d=parseInt(document.getElementById('rk-d').value);const q=parseInt(document.getElementById('rk-q').value);if(!T||!P||isNaN(d)||isNaN(q)){setFB('rk-fb','err','Fill in all fields.');return;}rkReset();const n=T.length,m=P.length;if(m>n){setFB('rk-fb','err','Pattern longer than text.');return;}// Convert to numeric if digit-only, else use char codes
-const isDigit=/^\d+$/.test(T+P);const tArr=isDigit?T.split('').map(Number):T.split('').map(c=>c.charCodeAt(0));const pArr=isDigit?P.split('').map(Number):P.split('').map(c=>c.charCodeAt(0));// Compute h = d^(m-1) mod q
+let rkData=null,rkStep=0,rkSteps=[],rkEncoding='ascii';
+function rkSetEncoding(mode){
+  rkEncoding=mode;
+  const aBtn=document.getElementById('rk-enc-ascii');
+  const bBtn=document.getElementById('rk-enc-alpha');
+  if(mode==='ascii'){
+    aBtn.style.borderColor='var(--accent)';aBtn.style.color='var(--accent)';aBtn.style.background='var(--accent-dim)';
+    bBtn.style.borderColor='';bBtn.style.color='';bBtn.style.background='';
+  } else {
+    bBtn.style.borderColor='var(--purple)';bBtn.style.color='var(--purple)';bBtn.style.background='var(--purple-dim)';
+    aBtn.style.borderColor='';aBtn.style.color='';aBtn.style.background='';
+  }
+  // reload if a problem is already loaded
+  if(rkData) rkLoad();
+}
+function rkCharVal(c,isDigit){
+  if(isDigit) return Number(c);
+  if(rkEncoding==='alpha') return c.toUpperCase().charCodeAt(0)-64; // A=1
+  return c.charCodeAt(0); // ASCII
+}
+function rkLoad(){const T=document.getElementById('rk-text').value.trim();const P=document.getElementById('rk-pattern').value.trim();const d=parseInt(document.getElementById('rk-d').value);const q=parseInt(document.getElementById('rk-q').value);if(!T||!P||isNaN(d)||isNaN(q)){setFB('rk-fb','err','Fill in all fields.');return;}rkReset();const n=T.length,m=P.length;if(m>n){setFB('rk-fb','err','Pattern longer than text.');return;}
+const isDigit=/^\d+$/.test(T+P);const tArr=T.split('').map(c=>rkCharVal(c,isDigit));const pArr=P.split('').map(c=>rkCharVal(c,isDigit));
+// Show encoding map
+const encEl=document.getElementById('rk-enc-display');if(encEl){if(isDigit){encEl.style.display='none';}else{const uniq=[...new Set((T+P).toUpperCase().split(''))].sort();encEl.style.display='block';encEl.textContent='Encoding ('+( rkEncoding==='alpha'?'A=1':'ASCII')+'):  '+uniq.map(c=>c+'='+rkCharVal(c,false)).join(',  ');}}
+// Compute h = d^(m-1) mod q
 let h=1;for(let i=0;i<m-1;i++)h=(h*d)%q;// Compute p
 let p=0;for(let i=0;i<m;i++)p=(p*d+pArr[i])%q;// Compute t0
 let t0=0;for(let i=0;i<m;i++)t0=(t0*d+tArr[i])%q;// Generate ts values
-const tVals=[t0];for(let s=0;s<n-m;s++){let ts=tVals[s];let next=(d*(ts-tArr[s]*h)+tArr[s+m])%q;if(next<0)next+=q;tVals.push(next);}const validShifts=[];for(let s=0;s<=n-m;s++){if(tVals[s]===p){// Verify
-const window=T.substring(s,s+m);if(window===P)validShifts.push(s);}}rkData={T,P,d,q,n,m,h,p,t0,tArr,pArr,tVals,validShifts,isDigit};renderRkSteps();}
+const tVals=[t0];for(let s=0;s<n-m;s++){let ts=tVals[s];let next=(d*(ts-tArr[s]*h)+tArr[s+m])%q;if(next<0)next+=q;tVals.push(next);}const validShifts=[];for(let s=0;s<=n-m;s++){if(tVals[s]===p){const window=T.substring(s,s+m);if(window===P)validShifts.push(s);}}rkData={T,P,d,q,n,m,h,p,t0,tArr,pArr,tVals,validShifts,isDigit};renderRkSteps();}
 function rkReset(){rkData=null;rkStep=0;rkSteps=[];document.getElementById('rk-steps').textContent='Load a text and pattern to begin.';document.getElementById('rk-results').innerHTML='';document.getElementById('rk-log').innerHTML='';setFB('rk-fb','info','—');}
 function renderRkSteps(){if(!rkData)return;const{T,P,d,q,n,m,h,p,t0,tVals}=rkData;const cont=document.getElementById('rk-steps');cont.innerHTML='';const addStep=(label,formula,val,id)=>{const div=document.createElement('div');div.className='rk-step';div.innerHTML='<div class="rk-label">'+label+'</div><div>'+formula+' = <span class="rk-val" id="'+id+'">???</span></div>';cont.appendChild(div);};addStep('Step 1: compute h','d^(m-1) mod q = '+d+'^'+(m-1)+' mod '+q,'','rk-h');addStep('Step 2: compute p (pattern hash)','Horner\'s rule on "'+P+'" mod '+q,'','rk-p');addStep('Step 3: compute t₀ (first window hash)','Horner\'s rule on T[1..'+m+'] = "'+T.substring(0,m)+'" mod '+q,'','rk-t0');for(let s=1;s<=n-m;s++){addStep('Step '+(s+3)+': compute t'+s,'= ('+d+'(t'+(s-1)+' − T['+(s-1+1)+']·h) + T['+(s+m-1+1)+']) mod '+q,'','rk-t'+s);}// Now ask user to fill each
 setFB('rk-fb','info','Enter value for h = d^(m-1) mod q:');rkStep=0;document.getElementById('rk-input-area').innerHTML='<div class="fb info" id="rk-fb">Enter value for h = d^(m-1) mod q:</div><div class="row"><input type="number" id="rk-val-input" style="width:100px;" placeholder="0"><button class="btn btn-primary" onclick="rkSubmit()">Submit</button></div>';}
