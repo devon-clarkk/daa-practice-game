@@ -572,29 +572,61 @@ input[type=text]::placeholder,input[type=number]::placeholder{color:var(--text3)
     <button class="btn btn-primary" onclick="decodeLoad()">Build tree + generate bitstring</button>
     <button class="btn" onclick="decodeReset()">Reset</button>
   </div>
-  <div class="grid2">
-    <div><div class="panel">
-      <div class="panel-title">Bitstring to decode</div>
-      <div class="bit-stream" id="dec-bitstream"></div>
-      <div class="panel-title">Decoded output</div>
-      <div class="decoded-output" id="dec-output"></div>
-      <div class="fb info" id="dec-fb">Build a tree first.</div>
-      <div class="panel-title">Next bit(s)</div>
-      <div class="row">
-        <button class="btn" onclick="decodeBit('0')">Add 0</button>
-        <button class="btn" onclick="decodeBit('1')">Add 1</button>
-        <button class="btn" onclick="decodeUndo()">Undo</button>
-        <button class="btn btn-green" id="dec-emit-btn" onclick="decodeEmit()" disabled>Emit symbol</button>
-      </div>
-      <div class="step-log mt2" id="dec-log"></div>
-    </div></div>
-    <div><div class="panel">
-      <div class="panel-title">Huffman tree (reference)</div>
-      <div class="tree-container" id="dec-tree"></div>
-      <div class="panel-title mt2">Code table</div>
-      <div class="codes-grid" id="dec-codes"></div>
-      <div class="done-banner" id="dec-done">✓ All symbols decoded!</div>
-    </div></div>
+  <!-- MODE TOGGLE -->
+  <div style="display:flex;gap:6px;margin-bottom:1rem;">
+    <button class="btn" id="dec-mode-practice" onclick="decSetMode('practice')" style="border-color:var(--accent);color:var(--accent);background:var(--accent-dim);">Practice — walk the tree</button>
+    <button class="btn" id="dec-mode-validate" onclick="decSetMode('validate')" style="">Validation — type your answer</button>
+  </div>
+
+  <!-- PRACTICE MODE -->
+  <div id="dec-practice-ui">
+    <div class="grid2">
+      <div><div class="panel">
+        <div class="panel-title">Bitstring to decode</div>
+        <div class="bit-stream" id="dec-bitstream"></div>
+        <div class="panel-title">Decoded output</div>
+        <div class="decoded-output" id="dec-output"></div>
+        <div class="fb info" id="dec-fb">Build a tree first.</div>
+        <div class="panel-title">Next bit(s)</div>
+        <div class="row">
+          <button class="btn" onclick="decodeBit('0')">Add 0</button>
+          <button class="btn" onclick="decodeBit('1')">Add 1</button>
+          <button class="btn" onclick="decodeUndo()">Undo</button>
+          <button class="btn btn-green" id="dec-emit-btn" onclick="decodeEmit()" disabled>Emit symbol</button>
+        </div>
+        <div class="step-log mt2" id="dec-log"></div>
+      </div></div>
+      <div><div class="panel">
+        <div class="panel-title">Huffman tree (reference)</div>
+        <div class="tree-container" id="dec-tree"></div>
+        <div class="panel-title mt2">Code table</div>
+        <div class="codes-grid" id="dec-codes"></div>
+        <div class="done-banner" id="dec-done">✓ All symbols decoded!</div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- VALIDATION MODE -->
+  <div id="dec-validate-ui" style="display:none;">
+    <div class="grid2">
+      <div><div class="panel">
+        <div class="panel-title">Bitstring to decode</div>
+        <div class="bit-stream" id="dec-bitstream-v" style="margin-bottom:1rem;"></div>
+        <div class="panel-title">Your decoded string</div>
+        <input type="text" id="dec-val-input" placeholder="e.g. ABCAD" style="width:100%;margin-bottom:.75rem;font-size:1rem;letter-spacing:.08em;" onkeydown="if(event.key==='Enter')decValidate()">
+        <div class="row">
+          <button class="btn btn-primary" onclick="decValidate()">Check answer</button>
+          <button class="btn btn-amber" onclick="decReveal()">Reveal answer</button>
+        </div>
+        <div class="fb info mt2" id="dec-val-fb" style="margin-top:.75rem;">Build a tree and type your decoded string.</div>
+      </div></div>
+      <div><div class="panel">
+        <div class="panel-title">Huffman tree (reference)</div>
+        <div class="tree-container" id="dec-tree-v"></div>
+        <div class="panel-title mt2">Code table</div>
+        <div class="codes-grid" id="dec-codes-v"></div>
+      </div></div>
+    </div>
   </div>
 </div>
 
@@ -1228,9 +1260,63 @@ function entropyReset(){
 function entropyToHuffman(){if(!entSyms.length)return;const raw=entSyms.map(p=>p.label+'='+p.freq).join(', ');showPage('huffman');document.getElementById('huff-input').value=raw;huffLoad(raw);}
 
 // ═══════════════════════════════════════════════════ DECODE
-let decTree=null,decCodes={},decBits='',decCurrent='',decOutput='',decOrigOrder=[];
-function decodeLoad(raw){const inp=raw||document.getElementById('dec-syms').value.trim();if(!inp)return;decodeReset();const parsed=parseSyms(inp);if(parsed.length<2){alert('Need ≥2 symbols');return;}decOrigOrder=parsed.map(p=>p.label);let nodes=parsed.map(p=>mkNode(p.label,p.freq,true));while(nodes.length>1){nodes.sort((a,b)=>a.freq-b.freq);const a=nodes.shift(),b=nodes.shift();nodes.push(mkNode('('+a.label+'+'+b.label+')',a.freq+b.freq,false,a,b));}decTree=nodes[0];getCodes(decTree,'',decCodes);renderSVGTree('dec-tree',nodes,n=>n.label+':'+n.freq,COLS.huff);const el=document.getElementById('dec-codes');if(el){el.innerHTML='';decOrigOrder.forEach(sym=>{if(decCodes[sym]===undefined)return;const c=document.createElement('div');c.className='code-card';c.innerHTML='<div class="code-sym">'+sym+'</div><div class="code-bits">'+decCodes[sym]+'</div><div class="code-len">'+decCodes[sym].length+' bit'+(decCodes[sym].length!==1?'s':'')+'</div>';el.appendChild(c);});}const msg=[];const syms=decOrigOrder;for(let i=0;i<8+Math.floor(Math.random()*5);i++)msg.push(pick(syms));decBits=msg.map(s=>decCodes[s]).join('');decCurrent='';decOutput='';renderBitStream();setFB('dec-fb','info','Use Add 0 / Add 1 to walk the tree. Hit Emit when you reach a leaf.');document.getElementById('dec-output').setAttribute('data-expected',msg.join(''));document.getElementById('dec-output').textContent='';document.getElementById('dec-done').style.display='none';addLog('dec-log','info','Message length: '+decBits.length+' bits');}
-function decodeReset(){decTree=null;decCodes={};decBits='';decCurrent='';decOutput='';['dec-tree','dec-codes','dec-log'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML='';});const o=document.getElementById('dec-output');if(o)o.textContent='';const dd=document.getElementById('dec-done');if(dd)dd.style.display='none';setFB('dec-fb','info','Build a tree first.');renderBitStream();}
+let decTree=null,decCodes={},decBits='',decCurrent='',decOutput='',decOrigOrder=[],decMode='practice';
+function decSetMode(m){
+  decMode=m;
+  const pBtn=document.getElementById('dec-mode-practice');
+  const vBtn=document.getElementById('dec-mode-validate');
+  const pUI=document.getElementById('dec-practice-ui');
+  const vUI=document.getElementById('dec-validate-ui');
+  if(m==='practice'){
+    pBtn.style.borderColor='var(--accent)';pBtn.style.color='var(--accent)';pBtn.style.background='var(--accent-dim)';
+    vBtn.style.borderColor='';vBtn.style.color='';vBtn.style.background='';
+    pUI.style.display='';vUI.style.display='none';
+  } else {
+    vBtn.style.borderColor='var(--purple)';vBtn.style.color='var(--purple)';vBtn.style.background='var(--purple-dim)';
+    pBtn.style.borderColor='';pBtn.style.color='';pBtn.style.background='';
+    pUI.style.display='none';vUI.style.display='';
+    // sync bitstream + tree to validation panel if tree is loaded
+    if(decTree) decSyncValidationPanel();
+  }
+}
+function decSyncValidationPanel(){
+  const bsv=document.getElementById('dec-bitstream-v');
+  if(bsv){bsv.innerHTML='';decBits.split('').forEach(b=>{const s=document.createElement('span');s.className='bit pending';s.textContent=b;bsv.appendChild(s);});}
+  // copy tree SVG
+  const srcTree=document.getElementById('dec-tree');
+  const dstTree=document.getElementById('dec-tree-v');
+  if(srcTree&&dstTree)dstTree.innerHTML=srcTree.innerHTML;
+  // copy codes
+  const srcCodes=document.getElementById('dec-codes');
+  const dstCodes=document.getElementById('dec-codes-v');
+  if(srcCodes&&dstCodes)dstCodes.innerHTML=srcCodes.innerHTML;
+  setFB('dec-val-fb','info','Type your decoded string and hit Check.');
+  document.getElementById('dec-val-input').value='';
+}
+function decValidate(){
+  const inp=document.getElementById('dec-val-input').value.trim().toUpperCase();
+  const expected=(document.getElementById('dec-output').getAttribute('data-expected')||'').toUpperCase();
+  if(!expected){setFB('dec-val-fb','err','Build a tree first.');return;}
+  if(!inp){setFB('dec-val-fb','warn','Enter your answer first.');return;}
+  if(inp===expected){
+    setFB('dec-val-fb','ok','✓ Correct! The decoded string is "'+expected+'".');
+  } else {
+    // find first mismatch position
+    let hint='';
+    for(let i=0;i<Math.max(inp.length,expected.length);i++){
+      if(inp[i]!==expected[i]){hint=' First mismatch at position '+(i+1)+(inp[i]?' (got "'+inp[i]+'"':'(missing char')+').';break;}
+    }
+    setFB('dec-val-fb','err','✗ Not quite — got "'+inp+'".'+hint);
+  }
+}
+function decReveal(){
+  const expected=document.getElementById('dec-output').getAttribute('data-expected')||'';
+  if(!expected){setFB('dec-val-fb','err','Build a tree first.');return;}
+  setFB('dec-val-fb','warn','Answer: "'+expected+'"');
+  document.getElementById('dec-val-input').value=expected;
+}
+function decodeLoad(raw){const inp=raw||document.getElementById('dec-syms').value.trim();if(!inp)return;decodeReset();const parsed=parseSyms(inp);if(parsed.length<2){alert('Need ≥2 symbols');return;}decOrigOrder=parsed.map(p=>p.label);let nodes=parsed.map(p=>mkNode(p.label,p.freq,true));while(nodes.length>1){nodes.sort((a,b)=>a.freq-b.freq);const a=nodes.shift(),b=nodes.shift();nodes.push(mkNode('('+a.label+'+'+b.label+')',a.freq+b.freq,false,a,b));}decTree=nodes[0];getCodes(decTree,'',decCodes);renderSVGTree('dec-tree',nodes,n=>n.label+':'+n.freq,COLS.huff);const el=document.getElementById('dec-codes');if(el){el.innerHTML='';decOrigOrder.forEach(sym=>{if(decCodes[sym]===undefined)return;const c=document.createElement('div');c.className='code-card';c.innerHTML='<div class="code-sym">'+sym+'</div><div class="code-bits">'+decCodes[sym]+'</div><div class="code-len">'+decCodes[sym].length+' bit'+(decCodes[sym].length!==1?'s':'')+'</div>';el.appendChild(c);});}const msg=[];const syms=decOrigOrder;for(let i=0;i<8+Math.floor(Math.random()*5);i++)msg.push(pick(syms));decBits=msg.map(s=>decCodes[s]).join('');decCurrent='';decOutput='';renderBitStream();setFB('dec-fb','info','Use Add 0 / Add 1 to walk the tree. Hit Emit when you reach a leaf.');document.getElementById('dec-output').setAttribute('data-expected',msg.join(''));document.getElementById('dec-output').textContent='';document.getElementById('dec-done').style.display='none';addLog('dec-log','info','Message length: '+decBits.length+' bits');decSyncValidationPanel();}
+function decodeReset(){decTree=null;decCodes={};decBits='';decCurrent='';decOutput='';['dec-tree','dec-codes','dec-log','dec-tree-v','dec-codes-v','dec-bitstream-v'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML='';});const o=document.getElementById('dec-output');if(o)o.textContent='';const dd=document.getElementById('dec-done');if(dd)dd.style.display='none';const vi=document.getElementById('dec-val-input');if(vi)vi.value='';setFB('dec-fb','info','Build a tree first.');setFB('dec-val-fb','info','Build a tree and type your decoded string.');renderBitStream();}
 function renderBitStream(){const el=document.getElementById('dec-bitstream');if(!el)return;el.innerHTML='';const consumed=decOutput.split('').map(s=>decCodes[s]||'').join('').length;for(let i=0;i<decBits.length;i++){const s=document.createElement('span');s.className='bit '+(i<consumed?'consumed':i<consumed+decCurrent.length?'current':'pending');s.textContent=decBits[i];el.appendChild(s);}}
 function decodeBit(b){if(!decTree){setFB('dec-fb','err','Build a tree first.');return;}decCurrent+=b;renderBitStream();const match=Object.entries(decCodes).find(([s,c])=>c===decCurrent);const partial=Object.entries(decCodes).some(([s,c])=>c.startsWith(decCurrent));const mb=document.getElementById('dec-emit-btn');if(match){setFB('dec-fb','ok','✓ "'+decCurrent+'" matches "'+match[0]+'" — hit Emit!');if(mb)mb.disabled=false;}else if(!partial){setFB('dec-fb','err','✗ "'+decCurrent+'" matches no code — try undoing.');if(mb)mb.disabled=true;}else{setFB('dec-fb','info','"'+decCurrent+'" — keep going...');if(mb)mb.disabled=true;}}
 function decodeEmit(){const match=Object.entries(decCodes).find(([s,c])=>c===decCurrent);if(!match)return;decOutput+=match[0];decCurrent='';const o=document.getElementById('dec-output');if(o)o.textContent=decOutput;addLog('dec-log','ok','✓ Emitted: '+match[0]);renderBitStream();const expected=document.getElementById('dec-output').getAttribute('data-expected');const mb=document.getElementById('dec-emit-btn');if(mb)mb.disabled=true;if(decOutput===expected){setFB('dec-fb','ok','✓ Complete! Decoded: '+decOutput);document.getElementById('dec-done').style.display='block';if(examActive)examTaskDone();}else setFB('dec-fb','info','Good — continue decoding.');}
