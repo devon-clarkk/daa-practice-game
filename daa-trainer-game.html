@@ -708,6 +708,82 @@ input[type=text]::placeholder,input[type=number]::placeholder{color:var(--text3)
 <div class="page" id="page-rabinkarp">
   <div class="page-title">Rabin-Karp Hashing</div>
   <div class="page-sub">// compute p, h, t₀, and rolling hash values step by step</div>
+
+  <!-- CONCEPT EXPLAINER (collapsible) -->
+  <div class="ent-explainer" id="rk-concept" style="margin-bottom:1rem;">
+    <div class="ent-concept-header" onclick="rkToggleConcept()">
+      <span>&#9654; Concept &amp; Method</span>
+      <span class="ent-concept-toggle" id="rk-concept-arrow">show</span>
+    </div>
+    <div class="ent-concept-body" id="rk-concept-body" style="display:none;">
+
+      <div class="ent-concept-section">
+        <div class="ent-concept-title">What is Rabin-Karp?</div>
+        <div class="ent-concept-text">Rabin-Karp is a string-matching algorithm that uses hashing to find a pattern P inside a text T. Instead of comparing characters one by one at every position, it computes a hash of the pattern and a rolling hash of each window of T. Only when the hashes match does it do a character-by-character verification. This makes the average case O(n + m).</div>
+      </div>
+
+      <div class="ent-concept-section">
+        <div class="ent-concept-title">Symbol glossary</div>
+        <div class="ent-concept-text">
+          <strong style="color:var(--accent);">T</strong> — the text being searched (length n)<br>
+          <strong style="color:var(--accent);">P</strong> — the pattern to find (length m)<br>
+          <strong style="color:var(--accent);">n</strong> — length of T<br>
+          <strong style="color:var(--accent);">m</strong> — length of P<br>
+          <strong style="color:var(--accent);">d</strong> — radix (base). Use 10 for digit strings, 26 or 256 for letters<br>
+          <strong style="color:var(--accent);">q</strong> — a prime modulus to keep hash values small and avoid overflow<br>
+          <strong style="color:var(--accent);">h</strong> — precomputed multiplier: d^(m−1) mod q. Represents the positional weight of the leftmost character in a window<br>
+          <strong style="color:var(--accent);">p</strong> — hash of the pattern P<br>
+          <strong style="color:var(--accent);">t₀</strong> — hash of the first window of T (characters T[1..m])<br>
+          <strong style="color:var(--accent);">tₛ</strong> — hash of the window starting at position s. A hash match (tₛ = p) means a <em>candidate</em> match — needs verification<br>
+          <strong style="color:var(--accent);">spurious hit</strong> — when tₛ = p but the actual characters don't match P. These are false positives caused by hash collisions modulo q
+        </div>
+      </div>
+
+      <div class="ent-concept-section">
+        <div class="ent-concept-title">Step-by-step algorithm</div>
+        <div class="ent-concept-text ent-steps">
+          <div class="ent-step"><span class="ent-step-num">1</span><span>Compute <strong style="color:var(--amber);">h = d^(m−1) mod q</strong>. Multiply 1 by d a total of (m−1) times, taking mod q each time.</span></div>
+          <div class="ent-step"><span class="ent-step-num">2</span><span>Compute <strong style="color:var(--amber);">p</strong> using Horner's rule on P: start with 0, then for each character c in P left to right: <code style="color:var(--teal);">p = (p · d + c) mod q</code></span></div>
+          <div class="ent-step"><span class="ent-step-num">3</span><span>Compute <strong style="color:var(--amber);">t₀</strong> using Horner's rule on T[1..m]: same formula as above but on the first m characters of T.</span></div>
+          <div class="ent-step"><span class="ent-step-num">4</span><span>Compare t₀ with p. If equal, verify T[1..m] = P character by character.</span></div>
+          <div class="ent-step"><span class="ent-step-num">5</span><span>Slide the window: for each s from 1 to n−m, compute <strong style="color:var(--amber);">tₛ = (d · (tₛ₋₁ − T[s] · h) + T[s+m]) mod q</strong>. Add q if negative.</span></div>
+          <div class="ent-step"><span class="ent-step-num">6</span><span>Compare each tₛ with p. On a hash match, verify the actual characters. A mismatch after equal hashes is a spurious hit.</span></div>
+        </div>
+      </div>
+
+      <div class="ent-concept-section">
+        <div class="ent-concept-title">Worked example — T=31415, P=26, d=10, q=11</div>
+        <div class="ent-concept-text">
+          m = 2, n = 5<br><br>
+          <strong style="color:var(--amber);">h</strong> = 10^(2−1) mod 11 = 10 mod 11 = <strong style="color:var(--green);">10</strong><br><br>
+          <strong style="color:var(--amber);">p</strong> (Horner on "26"): 0→(0·10+2)=2→(2·10+6)=26 mod 11 = <strong style="color:var(--green);">4</strong><br><br>
+          <strong style="color:var(--amber);">t₀</strong> (Horner on "31"): 0→(0·10+3)=3→(3·10+1)=31 mod 11 = <strong style="color:var(--green);">9</strong><br><br>
+          <strong style="color:var(--amber);">t₁</strong>: (10·(9 − 3·10) + 4) mod 11 = (10·(9−30)+4) mod 11 = (10·(−21)+4) mod 11 = (−206) mod 11 = <strong style="color:var(--green);">2</strong> (add multiples of 11 until positive)<br><br>
+          <strong style="color:var(--amber);">t₂</strong>: (10·(2 − 1·10) + 4) mod 11 = (10·(−8)+4) mod 11 = −76 mod 11 = <strong style="color:var(--green);">0</strong><br><br>
+          <strong style="color:var(--amber);">t₃</strong>: (10·(0 − 4·10) + 1) mod 11 = (10·(−40)+1) mod 11 = −399 mod 11 = <strong style="color:var(--green);">7</strong><br><br>
+          p = 4. Compare: t₀=9 ✗, t₁=2 ✗, t₂=0 ✗, t₃=7 ✗ → no match found.
+        </div>
+      </div>
+
+      <div class="ent-concept-section">
+        <div class="ent-concept-title">The rolling hash intuition</div>
+        <div class="ent-concept-text">Think of the window hash as a base-d number mod q. When you slide right by one position, you remove the leftmost digit (multiply it by h to get its positional value, then subtract), shift everything left (multiply by d), and add the new rightmost digit. This is why you precompute h — it's the weight of the leftmost character's position.</div>
+      </div>
+
+      <div class="ent-concept-section">
+        <div class="ent-concept-title">Complexity &amp; exam notes</div>
+        <div class="ent-concept-text">
+          &#9888; <strong>Average case:</strong> O(n + m) — few spurious hits with a good prime q<br>
+          &#9888; <strong>Worst case:</strong> O(nm) — if every window is a spurious hit (e.g. all same character, q=2)<br>
+          &#9888; Always add q if the rolling hash goes negative before taking mod<br>
+          &#9888; q should be prime and large enough that spurious hits are rare — but small enough for easy arithmetic<br>
+          &#9888; A spurious hit costs O(m) to verify, so minimising them is key
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <div class="row mt1" style="margin-bottom:1rem;">
     <div class="rk-input-row">
       <div><label>Text T</label><input type="text" id="rk-text" placeholder="31415" style="width:130px;"></div>
@@ -1237,6 +1313,12 @@ function entShowWorking(){
 function entToggleConcept(){
   const body=document.getElementById('ent-concept-body');
   const arrow=document.getElementById('ent-concept-arrow');
+  if(body.style.display==='none'){body.style.display='grid';arrow.textContent='hide';}
+  else{body.style.display='none';arrow.textContent='show';}
+}
+function rkToggleConcept(){
+  const body=document.getElementById('rk-concept-body');
+  const arrow=document.getElementById('rk-concept-arrow');
   if(body.style.display==='none'){body.style.display='grid';arrow.textContent='hide';}
   else{body.style.display='none';arrow.textContent='show';}
 }
