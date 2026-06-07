@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAA Exam Trainer — Full</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* GitHub Dark */
+  --bg:#0d1117; --bg2:#161b22; --bg3:#21262d; --bg4:#2d333b;
+  --border:#30363d; --border2:#3d444d;
+  --text:#e6edf3; --text2:#8b949e; --text3:#484f58;
+  --accent:#58a6ff; --accent-dim:#0d2340;
+  --green:#3fb950; --green-dim:#0d2b14;
+  --red:#f85149; --red-dim:#2d1117;
+  --amber:#d29922; --amber-dim:#2b1e05;
+  --purple:#bc8cff; --purple-dim:#1e1040;
+  --teal:#39d353; --teal-dim:#0a2b10;
+  --orange:#e3b341; --orange-dim:#2b1d05;
+  --pink:#f778ba; --pink-dim:#2b0a1a;
+  --mono:'JetBrains Mono',monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;}
+/* ── DOUBLE-LAYER NAV ── */
+#nav-wrap{position:sticky;top:0;z-index:100;background:var(--bg2);border-bottom:1px solid var(--border);}
+/* Top row — week tabs */
+#nav-top{display:flex;align-items:center;height:54px;padding:0 1.5rem;border-bottom:1px solid var(--border);gap:0;overflow-x:auto;scrollbar-width:none;}
+#nav-top .brand{font-size:.95rem;font-weight:800;letter-spacing:-.02em;margin-right:1.5rem;color:var(--text);white-space:nowrap;flex-shrink:0;}
+.week-tab{padding:0 16px;height:100%;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--text2);font-family:var(--sans);font-size:.84rem;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;letter-spacing:.01em;}
+.week-tab:hover{color:var(--text);background:var(--bg3);}
+.week-tab.active{color:var(--text);border-bottom-color:var(--orange);}
+.week-tab.wk-exam{color:var(--amber);}
+.week-tab.wk-exam.active{color:var(--amber);border-bottom-color:var(--amber);}
+/* Bottom row — topic tabs */
+#nav-bot{display:flex;align-items:center;height:42px;padding:0 1.5rem;gap:2px;overflow-x:auto;}
+.topic-tab{padding:0 14px;height:100%;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--text2);font-family:var(--mono);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.topic-tab:hover{color:var(--text);background:var(--bg3);}
+.topic-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+/* hide week-group nav-bot sets */
+.week-topics{display:none;}
+.week-topics.active{display:flex;gap:2px;align-items:center;height:100%;}
+.page{display:none;padding:2rem;max-width:1200px;margin:0 auto;}
+.page.active{display:block;}
+.page-title{font-size:1.4rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.25rem;}
+.page-sub{font-size:.78rem;color:var(--text3);font-family:var(--mono);margin-bottom:1.5rem;letter-spacing:.05em;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+@media(max-width:900px){.grid2{grid-template-columns:1fr;}}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:1.25rem;}
+.panel-title{font-size:.7rem;font-family:var(--mono);color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
+input[type=text],input[type=number],select{background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:8px 14px;font-family:var(--mono);font-size:.85rem;color:var(--text);outline:none;transition:border-color .15s;}
+input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--accent);}
+input[type=text]::placeholder,input[type=number]::placeholder{color:var(--text3);}
+.btn{padding:8px 18px;border-radius:6px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-family:var(--sans);font-size:.85rem;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.btn:hover:not(:disabled){background:var(--bg3);}
+.btn:disabled{opacity:.3;cursor:not-allowed;}
+.btn-primary{background:#238636;border-color:#2ea043;color:#fff;}
+.btn-primary:hover:not(:disabled){background:#2ea043;border-color:#3fb950;}
+.btn-green{background:var(--green-dim);border-color:var(--green);color:var(--green);}
+.btn-green:hover:not(:disabled){background:#163d28;}
+.btn-amber{background:var(--amber-dim);border-color:var(--amber);color:var(--amber);}
+.btn-amber:hover:not(:disabled){background:#4a3510;}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.mt1{margin-top:.75rem;} .mt2{margin-top:1.25rem;}
+.node-pool{display:flex;flex-wrap:wrap;gap:8px;min-height:52px;padding:10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);margin-bottom:1rem;}
+.node-chip{display:inline-flex;align-items:center;padding:6px 14px;font-family:var(--mono);font-size:.85rem;font-weight:500;cursor:pointer;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text);transition:all .12s;user-select:none;}
+.node-chip.square{border-radius:5px;}
+.node-chip.circular{border-radius:20px;}
+.node-chip:hover{border-color:var(--accent);color:var(--accent);}
+.node-chip.selected{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+.sel-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-family:var(--mono);font-size:.85rem;flex-wrap:wrap;}
+.sel-slot{padding:5px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text2);min-width:80px;text-align:center;}
+.sel-slot.filled{color:var(--accent);border-color:var(--accent);background:var(--accent-dim);}
+.op{color:var(--text3);}
+.fb{padding:10px 14px;border-radius:8px;font-family:var(--mono);font-size:.8rem;margin-bottom:12px;min-height:40px;display:flex;align-items:center;gap:8px;border:1px solid transparent;}
+.fb.ok{background:var(--green-dim);border-color:var(--green);color:var(--green);}
+.fb.err{background:var(--red-dim);border-color:var(--red);color:var(--red);}
+.fb.info{background:var(--bg3);border-color:var(--border);color:var(--text2);}
+.fb.warn{background:var(--amber-dim);border-color:var(--amber);color:var(--amber);}
+.step-log{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:.75rem;color:var(--text2);max-height:150px;overflow-y:auto;line-height:1.8;}
+.step-log .ok{color:var(--green);} .step-log .err{color:var(--red);} .step-log .info{color:var(--text3);}
+.tree-container{overflow:auto;padding:8px 4px;min-height:80px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);margin-bottom:1rem;}
+.codes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;}
+.code-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--mono);}
+.code-sym{font-size:1rem;font-weight:700;color:var(--accent);margin-bottom:4px;}
+.code-bits{font-size:.85rem;color:var(--text);letter-spacing:.1em;}
+.code-len{font-size:.7rem;color:var(--text3);margin-top:2px;}
+.done-banner{padding:14px 18px;background:var(--green-dim);border:1px solid var(--green);border-radius:10px;color:var(--green);font-family:var(--mono);font-size:.85rem;margin-top:1rem;display:none;}
+.hint-box{font-family:var(--mono);font-size:.75rem;color:var(--text3);padding:8px 12px;background:var(--bg3);border-left:2px solid var(--border2);border-radius:0 6px 6px 0;margin-bottom:12px;line-height:1.6;}
+.phase-tabs{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;}
+.phase-tab{padding:5px 14px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-family:var(--mono);font-size:.75rem;cursor:pointer;transition:all .12s;}
+.phase-tab.p1{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+.phase-tab.p2{background:var(--purple-dim);border-color:var(--purple);color:var(--purple);}
+.phase-tab.p3{background:var(--teal-dim);border-color:var(--teal);color:var(--teal);}
+.phase-tab:disabled{opacity:.3;cursor:not-allowed;}
+.phase-badge{font-size:.65rem;padding:2px 8px;border-radius:10px;font-family:var(--mono);font-weight:700;letter-spacing:.05em;}
+.phase-badge.p1{background:var(--accent-dim);color:var(--accent);}
+.phase-badge.p2{background:var(--purple-dim);color:var(--purple);}
+.phase-badge.p3{background:var(--teal-dim);color:var(--teal);}
+.depth-row{display:flex;flex-wrap:wrap;gap:8px;padding:10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);margin-bottom:1rem;font-family:var(--mono);font-size:.82rem;}
+.depth-chip{padding:4px 12px;border-radius:4px;border:1px solid var(--purple);background:var(--purple-dim);color:var(--purple);}
+.p3-pool{display:flex;flex-wrap:wrap;gap:8px;min-height:52px;padding:10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);margin-bottom:1rem;}
+.p3-chip{display:inline-flex;flex-direction:column;align-items:center;padding:6px 12px;font-family:var(--mono);font-size:.8rem;border:1.5px solid var(--border2);background:var(--bg2);border-radius:6px;cursor:pointer;transition:all .12s;user-select:none;}
+.p3-chip .sym{font-weight:700;color:var(--teal);}
+.p3-chip .dep{font-size:.7rem;color:var(--text3);}
+.p3-chip.selected{border-color:var(--teal);background:var(--teal-dim);}
+.p3-chip:hover{border-color:var(--teal);}
+.p3-chip.int{border-radius:20px;}
+.p3-chip.int .sym{color:var(--text2);}
+.gzip-text{font-family:var(--mono);font-size:1.1rem;letter-spacing:.08em;padding:12px 16px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);margin-bottom:1rem;line-height:2;}
+.gzip-char{display:inline-block;padding:2px 6px;border-radius:4px;margin:2px;cursor:default;transition:background .15s;}
+.gzip-char.current{background:var(--accent-dim);border:1px solid var(--accent);color:var(--accent);}
+.gzip-char.done{background:var(--green-dim);color:var(--green);}
+.gzip-char.pending{color:var(--text2);}
+.pair-row{display:flex;gap:8px;margin-bottom:.75rem;align-items:flex-end;flex-wrap:wrap;}
+.pair-row label{font-family:var(--mono);font-size:.75rem;color:var(--text3);}
+.pair-row input{width:80px;font-size:.9rem;}
+.stream-display{display:flex;flex-wrap:wrap;gap:6px;margin-top:1rem;}
+.stream-pair{font-family:var(--mono);font-size:.82rem;padding:4px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text2);}
+.stream-pair.new-char{border-color:var(--accent);color:var(--accent);}
+.stream-pair.backref{border-color:var(--green);color:var(--green);}
+.entropy-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.82rem;margin-bottom:1rem;}
+.entropy-table th{color:var(--text3);font-weight:500;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.entropy-table td{padding:6px 10px;border-bottom:1px solid var(--border);}
+.entropy-result{font-size:1.4rem;font-weight:700;color:var(--accent);font-family:var(--mono);}
+.entropy-compare{font-family:var(--mono);font-size:.82rem;color:var(--text2);margin-top:.5rem;}
+.bit-stream{font-family:var(--mono);font-size:1.1rem;letter-spacing:.12em;padding:12px 16px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);margin-bottom:1rem;line-height:2;word-break:break-all;}
+.bit{display:inline-block;padding:1px 4px;border-radius:3px;margin:1px;cursor:default;}
+.bit.consumed{background:var(--green-dim);color:var(--green);}
+.bit.current{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent);}
+.bit.pending{color:var(--text3);}
+.decoded-output{font-family:var(--mono);font-size:1.2rem;letter-spacing:.1em;padding:10px 14px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);min-height:44px;color:var(--green);margin-bottom:1rem;}
+.quiz-q{font-size:1rem;font-weight:500;line-height:1.6;margin-bottom:1.5rem;padding:16px;background:var(--bg3);border-radius:8px;border-left:3px solid var(--accent);}
+.mc-options{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem;}
+.mc-opt{padding:12px 16px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;font-family:var(--mono);font-size:.9rem;cursor:pointer;transition:all .15s;text-align:left;}
+.mc-opt:hover:not(:disabled){border-color:var(--accent);background:var(--accent-dim);color:var(--accent);}
+.mc-opt.correct{background:var(--green-dim);border-color:var(--green);color:var(--green);}
+.mc-opt.wrong{background:var(--red-dim);border-color:var(--red);color:var(--red);}
+.mc-opt:disabled{cursor:default;}
+.quiz-score{font-family:var(--mono);font-size:.85rem;color:var(--text2);}
+.score-num{color:var(--amber);font-weight:700;font-size:1rem;}
+.exam-header{background:var(--amber-dim);border:1px solid var(--amber);border-radius:10px;padding:16px 20px;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.exam-title{color:var(--amber);font-size:1rem;font-weight:700;font-family:var(--mono);}
+.exam-progress{color:var(--amber);font-family:var(--mono);font-size:.82rem;}
+.exam-q-label{font-size:.7rem;font-family:var(--mono);color:var(--amber);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.75rem;}
+.topic-select-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:1.5rem;}
+.topic-card{padding:14px 16px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;cursor:pointer;transition:all .15s;}
+.topic-card:hover{border-color:var(--accent);background:var(--bg3);}
+.topic-card.selected{border-color:var(--amber);background:var(--amber-dim);}
+.topic-card .tc-name{font-weight:700;font-size:.9rem;margin-bottom:4px;}
+.topic-card .tc-desc{font-size:.75rem;color:var(--text2);font-family:var(--mono);}
+.sep{border:none;border-top:1px solid var(--border);margin:1rem 0;}
+/* ENTROPY REDESIGN */
+.ent-explainer{background:var(--bg2);border:1px solid var(--border);border-radius:6px;margin-bottom:1rem;overflow:hidden;}
+.ent-concept-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer;font-family:var(--mono);font-size:.82rem;color:var(--text2);transition:background .15s;}
+.ent-concept-header:hover{background:var(--bg3);}
+.ent-concept-toggle{font-size:.7rem;color:var(--accent);letter-spacing:.06em;}
+.ent-concept-body{padding:16px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:900px){.ent-concept-body{grid-template-columns:1fr;}}
+.ent-concept-section{background:var(--bg3);border-radius:6px;padding:12px 14px;}
+.ent-concept-title{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+.ent-concept-text{font-family:var(--mono);font-size:.78rem;color:var(--text2);line-height:1.8;}
+.ent-formula{color:var(--amber);font-family:var(--mono);}
+.ent-steps{display:flex;flex-direction:column;gap:6px;}
+.ent-step{display:flex;gap:10px;align-items:flex-start;}
+.ent-step-num{background:var(--accent-dim);color:var(--accent);border-radius:4px;padding:1px 7px;font-size:.72rem;font-weight:700;flex-shrink:0;margin-top:1px;}
+.ent-diff-badge{font-size:.65rem;padding:2px 8px;border-radius:10px;font-family:var(--mono);font-weight:700;}
+.ent-diff-badge.easy{background:var(--green-dim);color:var(--green);}
+.ent-diff-badge.medium{background:var(--amber-dim);color:var(--amber);}
+.ent-diff-badge.hard{background:var(--red-dim);color:var(--red);}
+.ent-qa-row{display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap;}
+.ent-qa-label{font-family:var(--mono);font-size:.82rem;color:var(--text2);white-space:nowrap;min-width:140px;}
+.ent-qa-fb{display:inline-flex;}
+/* PRESET STRIP */
+.preset-strip{display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
+.preset-label{font-family:var(--mono);font-size:.7rem;color:var(--text3);letter-spacing:.06em;white-space:nowrap;margin-right:2px;}
+.preset-btn{padding:4px 12px;border-radius:4px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-family:var(--mono);font-size:.74rem;cursor:pointer;transition:all .12s;white-space:nowrap;}
+.preset-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+/* DP TABLE */
+.dp-table-wrap{overflow-x:auto;margin-bottom:1rem;}
+.dp-table{border-collapse:collapse;font-family:var(--mono);font-size:.82rem;}
+.dp-table th,.dp-table td{border:1px solid var(--border);padding:6px 10px;text-align:center;min-width:44px;cursor:pointer;transition:background .1s;}
+.dp-table th{background:var(--bg3);color:var(--text3);cursor:default;}
+.dp-table td{background:var(--bg2);color:var(--text);}
+.dp-table td:hover{background:var(--bg4);}
+.dp-table td.filled{background:var(--green-dim);color:var(--green);cursor:default;}
+.dp-table td.current{background:var(--accent-dim);color:var(--accent);border-color:var(--accent);}
+.dp-table td.wrong-cell{background:var(--red-dim);color:var(--red);}
+.dp-table td.arrow{background:var(--purple-dim);color:var(--purple);}
+.dp-table td.header-row{background:var(--bg3);color:var(--text3);cursor:default;}
+/* MASTER THEOREM */
+.case-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem;}
+@media(max-width:700px){.case-cards{grid-template-columns:1fr;}}
+.case-card{padding:12px 14px;background:var(--bg2);border:1.5px solid var(--border2);border-radius:8px;font-family:var(--mono);font-size:.78rem;cursor:pointer;transition:all .15s;}
+.case-card:hover{border-color:var(--accent);}
+.case-card.selected{border-color:var(--amber);background:var(--amber-dim);}
+.case-card .case-label{font-size:.65rem;letter-spacing:.1em;color:var(--text3);margin-bottom:4px;}
+.case-card .case-rule{color:var(--text);line-height:1.5;}
+/* PARALLEL */
+.par-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
+.par-field{display:flex;flex-direction:column;gap:4px;}
+.par-field label{font-family:var(--mono);font-size:.72rem;color:var(--text3);}
+.par-result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:1rem;}
+.par-result-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:var(--mono);}
+.par-result-label{font-size:.68rem;color:var(--text3);letter-spacing:.08em;margin-bottom:4px;}
+.par-result-val{font-size:1rem;font-weight:700;color:var(--teal);}
+.par-result-val.wrong{color:var(--red);}
+.par-result-val.correct{color:var(--green);}
+/* RABIN-KARP */
+.rk-step{font-family:var(--mono);font-size:.82rem;padding:8px 12px;background:var(--bg3);border-radius:6px;border:1px solid var(--border);margin-bottom:6px;line-height:1.8;}
+.rk-step .rk-label{color:var(--text3);font-size:.72rem;letter-spacing:.08em;}
+.rk-step .rk-val{color:var(--amber);font-weight:700;}
+.rk-input-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end;}
+.rk-input-row label{font-family:var(--mono);font-size:.72rem;color:var(--text3);display:block;margin-bottom:3px;}
+.rk-input-row input{width:90px;}
+</style>
+</head>
+<body>
+
+<div id="nav-wrap">
+  <div id="nav-top">
+    <span class="brand">DAA Trainer</span>
+    <button class="week-tab active" onclick="switchWeek('w7')" id="wtab-w7">Week 7 — Compression</button>
+    <button class="week-tab" onclick="switchWeek('rev')" id="wtab-rev">Review</button>
+    <button class="week-tab" onclick="switchWeek('w8')" id="wtab-w8">Week 8 — String Matching</button>
+    <button class="week-tab" onclick="switchWeek('w910')" id="wtab-w910">Week 9-10 — Dynamic Programming</button>
+    <button class="week-tab" onclick="switchWeek('w11')" id="wtab-w11">Week 11 — Parallel</button>
+    <button class="week-tab wk-exam" onclick="switchWeek('special')" id="wtab-special">Quiz &amp; Exam</button>
+  </div>
+  <div id="nav-bot">
+    <div class="week-topics active" id="wtopics-w7">
+      <button class="topic-tab active" onclick="showPage('huffman')" data-page="huffman">Huffman</button>
+      <button class="topic-tab" onclick="showPage('hutcker')" data-page="hutcker">Hu-Tucker</button>
+      <button class="topic-tab" onclick="showPage('gzip')" data-page="gzip">Gzip</button>
+      <button class="topic-tab" onclick="showPage('entropy')" data-page="entropy">Entropy</button>
+      <button class="topic-tab" onclick="showPage('decode')" data-page="decode">Huffman Decode</button>
+    </div>
+    <div class="week-topics" id="wtopics-rev">
+      <button class="topic-tab" onclick="showPage('master')" data-page="master">Master Theorem</button>
+      <button class="topic-tab" onclick="showPage('recurrence')" data-page="recurrence">Recurrence Writing</button>
+    </div>
+    <div class="week-topics" id="wtopics-w8">
+      <button class="topic-tab" onclick="showPage('rabinkarp')" data-page="rabinkarp">Rabin-Karp</button>
+    </div>
+    <div class="week-topics" id="wtopics-w910">
+      <button class="topic-tab" onclick="showPage('knapsack')" data-page="knapsack">0/1 Knapsack DP</button>
+      <button class="topic-tab" onclick="showPage('lcs')" data-page="lcs">LCS</button>
+      <button class="topic-tab" onclick="showPage('matchain')" data-page="matchain">Matrix Chain</button>
+    </div>
+    <div class="week-topics" id="wtopics-w11">
+      <button class="topic-tab" onclick="showPage('parallel')" data-page="parallel">PRAM Analysis</button>
+    </div>
+    <div class="week-topics" id="wtopics-special">
+      <button class="topic-tab" onclick="showPage('quiz')" data-page="quiz">Quick Quiz</button>
+      <button class="topic-tab" onclick="showPage('exam')" data-page="exam" style="color:var(--amber);">&#9889; Exam Mode</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ HUFFMAN PAGE -->
+<div class="page active" id="page-huffman">
+  <div class="page-title">Huffman Coding</div>
+  <div class="page-sub">// greedy bottom-up — always merge the two lowest frequency nodes</div>
+  <div class="preset-strip" style="margin-bottom:.6rem;">
+    <span class="preset-label">Random:</span>
+    <button class="preset-btn" onclick="huffImport(4)">4</button>
+    <button class="preset-btn" onclick="huffImport(5)">5</button>
+    <button class="preset-btn" onclick="huffImport(6)">6</button>
+    <button class="preset-btn" onclick="huffImport(7)">7</button>
+    <button class="preset-btn" onclick="huffImport(8)">8</button>
+  </div>
+  <div class="row mt1" style="margin-bottom:1.5rem;">
+    <input type="text" id="huff-input" placeholder="A=14, B=2, C=7, D=3, E=11" style="width:320px;">
+    <button class="btn btn-primary" onclick="huffLoad()">Load</button>
+    <button class="btn" onclick="huffReset()">Reset</button>
+  </div>
+  <div class="grid2">
+    <div><div class="panel">
+      <div class="panel-title">Node pool</div>
+      <div class="node-pool" id="huff-pool"></div>
+      <div class="sel-row">
+        <div class="sel-slot" id="hsel-a">—</div><span class="op">+</span>
+        <div class="sel-slot" id="hsel-b">—</div><span class="op">=</span>
+        <span id="hsel-sum" style="font-family:var(--mono);font-size:.85rem;color:var(--text2);">?</span>
+      </div>
+      <div class="fb info" id="huff-fb">Load symbols to begin.</div>
+      <div class="row">
+        <button class="btn btn-primary" id="huff-merge-btn" onclick="huffMerge()" disabled>Merge</button>
+        <button class="btn" onclick="huffClearSel()">Clear</button>
+      </div>
+      <hr class="sep">
+      <div class="panel-title">Step log</div>
+      <div class="step-log" id="huff-log"></div>
+    </div></div>
+    <div><div class="panel">
+      <div class="panel-title">Tree</div>
+      <div class="tree-container" id="huff-tree"></div>
+      <div class="panel-title mt2">Codes</div>
+      <div class="codes-grid" id="huff-codes"></div>
+      <div class="done-banner" id="huff-done">✓ Huffman complete!</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ HU-TUCKER PAGE -->
+<div class="page" id="page-hutcker">
+  <div class="page-title">Hu-Tucker Algorithm</div>
+  <div class="page-sub">// alphabetically-ordered optimal prefix code — three phases</div>
+  <div class="preset-strip" style="margin-bottom:.6rem;">
+    <span class="preset-label">Random:</span>
+    <button class="preset-btn" onclick="htImport(4)">4</button>
+    <button class="preset-btn" onclick="htImport(5)">5</button>
+    <button class="preset-btn" onclick="htImport(6)">6</button>
+    <button class="preset-btn" onclick="htImport(7)">7</button>
+    <button class="preset-btn" onclick="htImport(8)">8</button>
+  </div>
+  <div class="row mt1" style="margin-bottom:1.5rem;">
+    <input type="text" id="ht-input" placeholder="A=3, B=1, C=7, D=2, E=5, F=8, G=1, H=4" style="width:380px;">
+    <button class="btn btn-primary" onclick="htLoad()">Load</button>
+    <button class="btn" onclick="htReset()">Reset</button>
+  </div>
+  <div class="phase-tabs">
+    <button class="phase-tab p1" id="ptab-1" onclick="htSetPhase(1)">Phase 1 — Combination</button>
+    <button class="phase-tab" id="ptab-2" onclick="htSetPhase(2)" disabled>Phase 2 — Assignment</button>
+    <button class="phase-tab" id="ptab-3" onclick="htSetPhase(3)" disabled>Phase 3 — Reconstruction</button>
+  </div>
+  <div id="ht-phase1">
+    <div class="grid2">
+      <div><div class="panel">
+        <div class="panel-title">Sequence <span class="phase-badge p1">PHASE 1</span></div>
+        <div class="hint-box">Merge compatible pairs (no square node between them) with lowest combined weight. Leftmost on tie.</div>
+        <div class="node-pool" id="ht-pool"></div>
+        <div class="sel-row">
+          <div class="sel-slot" id="htsel-a">—</div><span class="op">+</span>
+          <div class="sel-slot" id="htsel-b">—</div><span class="op">=</span>
+          <span id="htsel-sum" style="font-family:var(--mono);font-size:.85rem;color:var(--text2);">?</span>
+        </div>
+        <div class="fb info" id="ht-fb">Load symbols to begin.</div>
+        <div class="row">
+          <button class="btn btn-primary" id="ht-merge-btn" onclick="htMerge()" disabled>Merge</button>
+          <button class="btn" onclick="htClearSel()">Clear</button>
+        </div>
+        <hr class="sep">
+        <div class="panel-title">Step log</div>
+        <div class="step-log" id="ht-log"></div>
+      </div></div>
+      <div><div class="panel">
+        <div class="panel-title">Tree (Phase 1)</div>
+        <div class="tree-container" id="ht-tree"></div>
+        <div class="done-banner" id="ht-p1-done">✓ Phase 1 complete — go to Phase 2.</div>
+      </div></div>
+    </div>
+  </div>
+  <div id="ht-phase2" style="display:none;">
+    <div class="panel">
+      <div class="panel-title">Depth assignment <span class="phase-badge p2">PHASE 2</span></div>
+      <div class="hint-box">Read depth of each original square node from the Phase 1 tree. Root = level 0.</div>
+      <div id="ht-p2-content"></div>
+      <div class="done-banner" id="ht-p2-done" style="display:flex;">✓ Depths assigned.</div>
+      <div class="row mt2"><button class="btn btn-green" onclick="htSetPhase(3)">Continue to Phase 3 →</button></div>
+    </div>
+  </div>
+  <div id="ht-phase3" style="display:none;">
+    <div class="grid2">
+      <div><div class="panel">
+        <div class="panel-title">Reconstruction <span class="phase-badge p3">PHASE 3</span></div>
+        <div class="hint-box">Merge adjacent nodes at the same depth. Deepest level first. Leftmost on tie. Parent gets depth − 1.</div>
+        <div class="p3-pool" id="p3-pool"></div>
+        <div class="sel-row">
+          <div class="sel-slot" id="p3sel-a">—</div><span class="op">+</span>
+          <div class="sel-slot" id="p3sel-b">—</div>
+        </div>
+        <div class="fb info" id="p3-fb">Select two adjacent nodes at the same depth.</div>
+        <div class="row">
+          <button class="btn btn-primary" id="p3-merge-btn" onclick="p3Merge()" disabled>Merge</button>
+          <button class="btn" onclick="p3ClearSel()">Clear</button>
+        </div>
+        <hr class="sep">
+        <div class="panel-title">Step log</div>
+        <div class="step-log" id="p3-log"></div>
+      </div></div>
+      <div><div class="panel">
+        <div class="panel-title">Reconstruction tree</div>
+        <div class="tree-container" id="p3-tree"></div>
+        <div class="panel-title mt2">Final codes (alphabetic)</div>
+        <div class="codes-grid" id="p3-codes"></div>
+        <div class="done-banner" id="ht-p3-done">✓ Hu-Tucker complete! Alphabetically ordered codes assigned.</div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ GZIP PAGE -->
+<div class="page" id="page-gzip">
+  <div class="page-title">Gzip / Ziv-Lempel</div>
+  <div class="page-sub">// encode a string using (distance, length) pairs — sliding window back-references</div>
+  <div class="preset-strip" style="margin-bottom:.6rem;">
+    <span class="preset-label">Random:</span>
+    <button class="preset-btn" onclick="gzipImport(6)">6</button>
+    <button class="preset-btn" onclick="gzipImport(8)">8</button>
+    <button class="preset-btn" onclick="gzipImport(10)">10</button>
+    <button class="preset-btn" onclick="gzipImport(12)">12</button>
+    <button class="preset-btn" onclick="gzipImport(14)">14</button>
+  </div>
+  <div class="row mt1" style="margin-bottom:1.5rem;">
+    <input type="text" id="gzip-input" placeholder="ABRACADABRA" style="width:280px;">
+    <button class="btn btn-primary" onclick="gzipLoad()">Load</button>
+    <button class="btn" onclick="gzipReset()">Reset</button>
+  </div>
+  <div class="grid2">
+    <div><div class="panel">
+      <div class="panel-title">Current position</div>
+      <div class="gzip-text" id="gzip-display"></div>
+      <div class="hint-box" id="gzip-hint">Load a string to begin.</div>
+      <div class="fb info" id="gzip-fb">—</div>
+      <div class="panel-title">Enter next pair</div>
+      <div class="pair-row">
+        <div><label>Distance (0 = new char)</label><br><input type="text" id="gz-dist" placeholder="0" style="width:90px;margin-top:4px;"></div>
+        <div><label>Length / ASCII</label><br><input type="text" id="gz-len" placeholder="65" style="width:90px;margin-top:4px;"></div>
+        <button class="btn btn-primary" style="align-self:flex-end;" onclick="gzipSubmit()">Submit</button>
+      </div>
+      <hr class="sep">
+      <div class="panel-title">Step log</div>
+      <div class="step-log" id="gzip-log"></div>
+    </div></div>
+    <div><div class="panel">
+      <div class="panel-title">Symbol stream</div>
+      <div class="stream-display" id="gzip-stream"></div>
+      <div class="done-banner" id="gzip-done">✓ Encoding complete!</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ ENTROPY PAGE -->
+<div class="page" id="page-entropy">
+  <div class="page-title">Shannon Entropy</div>
+  <div class="page-sub">// H = Σ −pᵢ log₂ pᵢ — minimum average bits per symbol</div>
+
+  <!-- CONCEPT EXPLAINER (collapsible) -->
+  <div class="ent-explainer" id="ent-concept">
+    <div class="ent-concept-header" onclick="entToggleConcept()">
+      <span>&#9654; Concept &amp; Method</span>
+      <span class="ent-concept-toggle" id="ent-concept-arrow">show</span>
+    </div>
+    <div class="ent-concept-body" id="ent-concept-body" style="display:none;">
+      <div class="ent-concept-section">
+        <div class="ent-concept-title">What is entropy?</div>
+        <div class="ent-concept-text">Entropy H is the theoretical minimum average number of bits per symbol any compression scheme could ever achieve for a given set of frequencies. It is a lower bound — you cannot do better, no matter how clever your code is. Huffman coding gets within 1 bit of this bound.</div>
+      </div>
+      <div class="ent-concept-section">
+        <div class="ent-concept-title">The intuition</div>
+        <div class="ent-concept-text">A symbol that appears half the time (p = 0.5) carries 1 bit of information. One that appears a quarter of the time (p = 0.25) carries 2 bits. In general, a symbol with probability p carries −log₂(p) bits. Entropy is the weighted average of this over all symbols.</div>
+      </div>
+      <div class="ent-concept-section">
+        <div class="ent-concept-title">Step-by-step method</div>
+        <div class="ent-concept-text ent-steps">
+          <div class="ent-step"><span class="ent-step-num">1</span><span>Find total N = sum of all frequencies.</span></div>
+          <div class="ent-step"><span class="ent-step-num">2</span><span>For each symbol i: compute pᵢ = freqᵢ / N</span></div>
+          <div class="ent-step"><span class="ent-step-num">3</span><span>For each symbol i: compute −pᵢ log₂(pᵢ)</span></div>
+          <div class="ent-step"><span class="ent-step-num">4</span><span>H = sum of all −pᵢ log₂(pᵢ) values</span></div>
+          <div class="ent-step"><span class="ent-step-num">5</span><span>Total minimum bits = N × H</span></div>
+        </div>
+      </div>
+      <div class="ent-concept-section">
+        <div class="ent-concept-title">Exam shortcut — avoid fractions</div>
+        <div class="ent-concept-text">Instead of computing each pᵢ = f/N then taking log₂(f/N), use:<br><br><span class="ent-formula">N·H = N·log₂N − Σ fᵢ·log₂fᵢ</span><br><br>This takes log of whole numbers (5, 2, 11...) instead of fractions (5/11...) — same result, less painful.<br><br>Compute N·H first, then divide by N to get H.<br><br>&#9654; <strong style="color:var(--amber);">On a standard calculator (no log₂ button):</strong><br><br><span class="ent-formula">N·H = (N·log(N) − Σ fᵢ·log(fᵢ)) / log(2)</span><br><br>Since every term needs dividing by log(2), factor it out and do one division at the very end. log(2) = 0.3010 — write this on your cheat sheet.<br><br>Steps: (1) compute N·log(N), (2) compute each fᵢ·log(fᵢ) and sum, (3) subtract, (4) divide by 0.3010, (5) divide by N.</div>
+      </div>
+      <div class="ent-concept-section">
+        <div class="ent-concept-title">Worked example — A=5, B=2, C=2, D=1, E=1</div>
+        <div class="ent-concept-text">N = 11<br>11H = −(5·log₂(5/11) + 2·log₂(2/11) + 2·log₂(2/11) + 1·log₂(1/11) + 1·log₂(1/11))<br>    = −(5·(−1.137) + 2·(−2.459) + 2·(−2.459) + 1·(−3.459) + 1·(−3.459))<br>    = 5.686 + 4.918 + 4.918 + 3.459 + 3.459 = 22.44<br>H = 22.44 / 11 ≈ 2.04 bits/symbol</div>
+      </div>
+      <div class="ent-concept-section">
+        <div class="ent-concept-title">Common exam traps</div>
+        <div class="ent-concept-text">&#9888; H is bits <em>per symbol</em>, not total bits — always multiply by N for the total.<br>&#9888; log₂(x) = ln(x)/ln(2) on a calculator.<br>&#9888; The answer is always between 0 (only one symbol) and log₂(n) (all symbols equally likely).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIFFICULTY SELECTOR + RANDOM -->
+  <div class="preset-strip" style="margin:.75rem 0 .5rem;">
+    <span class="preset-label">Difficulty:</span>
+    <button class="preset-btn" onclick="entLoadDifficulty('easy')" id="entbtn-easy">Easy</button>
+    <button class="preset-btn" onclick="entLoadDifficulty('medium')" id="entbtn-medium">Medium</button>
+    <button class="preset-btn" onclick="entLoadDifficulty('hard')" id="entbtn-hard">Hard</button>
+    <span class="preset-label" style="margin-left:.5rem;">Random:</span>
+    <button class="preset-btn" onclick="entImport(3)">3</button>
+    <button class="preset-btn" onclick="entImport(4)">4</button>
+    <button class="preset-btn" onclick="entImport(5)">5</button>
+    <button class="preset-btn" onclick="entImport(6)">6</button>
+    <button class="preset-btn" onclick="entImport(7)">7</button>
+  </div>
+
+  <!-- PROBLEM DISPLAY -->
+  <div id="ent-problem-panel" style="display:none;" class="panel" style="margin-bottom:1rem;">
+    <div class="panel-title">Problem <span id="ent-diff-badge"></span></div>
+    <div id="ent-problem-text" style="font-family:var(--mono);font-size:.9rem;color:var(--text);margin-bottom:.75rem;line-height:1.8;"></div>
+    <div class="hint-box" id="ent-problem-hint"></div>
+  </div>
+
+  <div class="row mt1" style="margin-bottom:1.5rem;">
+    <input type="text" id="ent-input" placeholder="A=5, B=2, C=1, D=1, E=2" style="width:280px;">
+    <button class="btn btn-primary" onclick="entLoadCustom()">Load</button>
+    <button class="btn" onclick="entropyReset()">Reset</button>
+  </div>
+
+  <div class="grid2">
+    <div><div class="panel">
+      <div class="panel-title">Your answers</div>
+      <div id="ent-qa-area" style="display:none;">
+        <div style="font-family:var(--mono);font-size:.82rem;color:var(--text2);margin-bottom:1rem;line-height:1.8;" id="ent-qa-freqs"></div>
+        <div class="ent-qa-row">
+          <label class="ent-qa-label">Total N =</label>
+          <input type="number" id="ent-ans-n" placeholder="?" style="width:90px;">
+          <button class="btn" onclick="entCheckN()" style="padding:6px 12px;font-size:.8rem;">Check</button>
+          <span class="fb info ent-qa-fb" id="ent-fb-n" style="margin:0;min-height:0;padding:5px 10px;font-size:.75rem;"></span>
+        </div>
+        <div class="ent-qa-row" id="ent-row-nh" style="opacity:.35;">
+          <label class="ent-qa-label">N·H =</label>
+          <input type="number" id="ent-ans-nh" placeholder="?" style="width:110px;" step="0.001">
+          <button class="btn" onclick="entCheckNH()" style="padding:6px 12px;font-size:.8rem;">Check</button>
+          <span class="fb info ent-qa-fb" id="ent-fb-nh" style="margin:0;min-height:0;padding:5px 10px;font-size:.75rem;"></span>
+        </div>
+        <div class="ent-qa-row" id="ent-row-h" style="opacity:.35;">
+          <label class="ent-qa-label">H (bits/symbol) =</label>
+          <input type="number" id="ent-ans-h" placeholder="?" style="width:110px;" step="0.0001">
+          <button class="btn" onclick="entCheckH()" style="padding:6px 12px;font-size:.8rem;">Check</button>
+          <span class="fb info ent-qa-fb" id="ent-fb-h" style="margin:0;min-height:0;padding:5px 10px;font-size:.75rem;"></span>
+        </div>
+        <div class="row mt2">
+          <button class="btn btn-green" onclick="entShowWorking()">Show full working</button>
+          <button class="btn btn-green" id="ent-to-huff" style="display:none;" onclick="entropyToHuffman()">Open in Huffman →</button>
+        </div>
+      </div>
+      <div id="ent-working-area" style="display:none;margin-top:1rem;">
+        <div class="panel-title">Full working</div>
+        <table class="entropy-table" id="ent-table">
+          <thead><tr><th>Symbol</th><th>Freq</th><th>p = f/N</th><th>−p log₂ p</th></tr></thead>
+          <tbody id="ent-tbody"></tbody>
+        </table>
+        <div id="ent-result-row">
+          <div style="font-family:var(--mono);font-size:.82rem;color:var(--text3);margin-bottom:4px;">H =</div>
+          <div class="entropy-result" id="ent-result">—</div>
+          <div class="entropy-compare" id="ent-compare" style="font-family:var(--mono);font-size:.82rem;color:var(--text2);margin-top:.5rem;"></div>
+        </div>
+      </div>
+      <div style="display:none;" id="ent-qa-placeholder" style="font-family:var(--mono);font-size:.82rem;color:var(--text3);">Load a problem to begin.</div>
+    </div></div>
+
+    <div><div class="panel">
+      <div class="panel-title">Interpretation</div>
+      <div id="ent-explain" style="font-family:var(--mono);font-size:.82rem;color:var(--text2);line-height:1.9;">Load a problem to begin.</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ DECODE PAGE -->
+<div class="page" id="page-decode">
+  <div class="page-title">Huffman Decode</div>
+  <div class="page-sub">// given a tree and a bitstring — decode symbol by symbol</div>
+  <div class="preset-strip" style="margin-bottom:.6rem;">
+    <span class="preset-label">Random:</span>
+    <button class="preset-btn" onclick="decImport(4)">4</button>
+    <button class="preset-btn" onclick="decImport(5)">5</button>
+    <button class="preset-btn" onclick="decImport(6)">6</button>
+    <button class="preset-btn" onclick="decImport(7)">7</button>
+    <button class="preset-btn" onclick="decImport(8)">8</button>
+  </div>
+  <div class="row mt1" style="margin-bottom:.75rem;">
+    <input type="text" id="dec-syms" placeholder="A=5, B=2, C=1, D=1, E=2" style="width:280px;">
+    <button class="btn btn-primary" onclick="decodeLoad()">Build tree + generate bitstring</button>
+    <button class="btn" onclick="decodeReset()">Reset</button>
+  </div>
+  <div class="grid2">
+    <div><div class="panel">
+      <div class="panel-title">Bitstring to decode</div>
+      <div class="bit-stream" id="dec-bitstream"></div>
+      <div class="panel-title">Decoded output</div>
+      <div class="decoded-output" id="dec-output"></div>
+      <div class="fb info" id="dec-fb">Build a tree first.</div>
+      <div class="panel-title">Next bit(s)</div>
+      <div class="row">
+        <button class="btn" onclick="decodeBit('0')">Add 0</button>
+        <button class="btn" onclick="decodeBit('1')">Add 1</button>
+        <button class="btn" onclick="decodeUndo()">Undo</button>
+        <button class="btn btn-green" id="dec-emit-btn" onclick="decodeEmit()" disabled>Emit symbol</button>
+      </div>
+      <div class="step-log mt2" id="dec-log"></div>
+    </div></div>
+    <div><div class="panel">
+      <div class="panel-title">Huffman tree (reference)</div>
+      <div class="tree-container" id="dec-tree"></div>
+      <div class="panel-title mt2">Code table</div>
+      <div class="codes-grid" id="dec-codes"></div>
+      <div class="done-banner" id="dec-done">✓ All symbols decoded!</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ MASTER THEOREM PAGE -->
+<div class="page" id="page-master">
+  <div class="page-title">Master Theorem</div>
+  <div class="page-sub">// T(n) = aT(n/b) + f(n) — identify the case and state the solution</div>
+  <div class="row mt1" style="margin-bottom:1.5rem;">
+    <button class="btn btn-primary" onclick="masterNew()">New Question</button>
+    <button class="btn" onclick="masterReset()">Reset</button>
+    <span class="quiz-score">Score: <span class="score-num" id="master-correct">0</span> / <span id="master-total">0</span></span>
+  </div>
+  <div class="grid2">
+    <div><div class="panel">
+      <div class="panel-title">Recurrence</div>
+      <div class="quiz-q" id="master-q" style="white-space:pre-line;">Press "New Question" to begin.</div>
+      <div class="panel-title mt2">Step 1 — Compute nˡᵒᵍ_b(a)</div>
+      <div class="hint-box" id="master-hint">Compute log_b(a) first, then compare f(n) = Θ(nˡᵒᵍ_b(a)) determines the case.</div>
+      <div class="row" style="margin-bottom:1rem;">
+        <div style="font-family:var(--mono);font-size:.82rem;color:var(--text2);">log_b(a) = </div>
+        <input type="text" id="master-logba" placeholder="e.g. 1" style="width:90px;">
+        <button class="btn" onclick="masterCheckLog()">Check</button>
+        <div class="fb info" id="master-log-fb" style="margin-bottom:0;min-height:0;padding:6px 10px;font-size:.75rem;" id="master-log-fb"></div>
+      </div>
+      <div class="panel-title">Step 2 — Select the case</div>
+      <div class="case-cards" id="master-cases">
+        <div class="case-card" onclick="masterPickCase(1)" id="mcase-1"><div class="case-label">CASE 1</div><div class="case-rule">f(n) = O(nˡᵒᵍ_b(a) − ε)<br>T(n) = Θ(nˡᵒᵍ_b(a))</div></div>
+        <div class="case-card" onclick="masterPickCase(2)" id="mcase-2"><div class="case-label">CASE 2</div><div class="case-rule">f(n) = Θ(nˡᵒᵍ_b(a))<br>T(n) = Θ(nˡᵒᵍ_b(a) lg n)</div></div>
+        <div class="case-card" onclick="masterPickCase(3)" id="mcase-3"><div class="case-label">CASE 3</div><div class="case-rule">f(n) = Ω(nˡᵒᵍ_b(a) + ε)<br>T(n) = Θ(f(n))</div></div>
+      </div>
+      <div class="fb info" id="master-case-fb" style="margin-bottom:0;"></div>
+    </div></div>
+    <div><div class="panel">
+      <div class="panel-title">Step 3 — State the solution</div>
+      <div class="hint-box" id="master-sol-hint">Select a case first.</div>
+      <input type="text" id="master-answer" placeholder="e.g. Θ(n²) or Θ(n log n)" style="width:100%;margin-bottom:.75rem;">
+      <button class="btn btn-primary" onclick="masterCheckAnswer()">Submit answer</button>
+      <div class="fb info" id="master-answer-fb" style="margin-top:.75rem;"></div>
+      <hr class="sep">
+      <div class="panel-title">Reference</div>
+      <div style="font-family:var(--mono);font-size:.78rem;color:var(--text2);line-height:2;">
+        Case 1: f(n) dominated by n^log_b(a) → T(n) = Θ(n^log_b(a))<br>
+        Case 2: f(n) same order as n^log_b(a) → T(n) = Θ(n^log_b(a) · log n)<br>
+        Case 3: f(n) dominates n^log_b(a) → T(n) = Θ(f(n))<br>
+        <span style="color:var(--text3);">Check regularity condition for Case 3: af(n/b) ≤ cf(n)</span>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ RECURRENCE PAGE -->
+<div class="page" id="page-recurrence">
+  <div class="page-title">Recurrence Writing</div>
+  <div class="page-sub">// given a recursive function — write T(n) then solve it</div>
+  <div class="row mt1" style="margin-bottom:1.5rem;">
+    <button class="btn btn-primary" onclick="recurNew()">New Question</button>
+    <button class="btn" onclick="recurReset()">Reset</button>
+    <span class="quiz-score">Score: <span class="score-num" id="recur-correct">0</span> / <span id="recur-total">0</span></span>
+  </div>
+  <div class="panel" style="max-width:780px;">
+    <div class="panel-title">Algorithm</div>
+    <div class="quiz-q" id="recur-code" style="white-space:pre;font-family:var(--mono);font-size:.85rem;overflow-x:auto;">Press "New Question" to begin.</div>
+    <div class="panel-title mt2">Write the recurrence T(n) =</div>
+    <div class="row" style="margin-bottom:.75rem;">
+      <input type="text" id="recur-answer" placeholder="e.g. T(n-1) + O(n)" style="width:260px;">
+      <button class="btn btn-primary" onclick="recurCheck()">Submit</button>
+    </div>
+    <div class="fb info" id="recur-fb">Enter the recurrence relation.</div>
+    <div class="panel-title mt2">Complexity T(n) = </div>
+    <div class="row" style="margin-bottom:.75rem;">
+      <input type="text" id="recur-complexity" placeholder="e.g. O(n²)" style="width:200px;">
+      <button class="btn btn-primary" onclick="recurCheckComplexity()">Submit</button>
+    </div>
+    <div class="fb info" id="recur-complex-fb">Solve the recurrence.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ RABIN-KARP PAGE -->
+<div class="page" id="page-rabinkarp">
+  <div class="page-title">Rabin-Karp Hashing</div>
+  <div class="page-sub">// compute p, h, t₀, and rolling hash values step by step</div>
+  <div class="row mt1" style="margin-bottom:1rem;">
+    <div class="rk-input-row">
+      <div><label>Text T</label><input type="text" id="rk-text" placeholder="31415" style="width:130px;"></div>
+      <div><label>Pattern P</label><input type="text" id="rk-pattern" placeholder="26" style="width:100px;"></div>
+      <div><label>Radix d</label><input type="number" id="rk-d" value="10" style="width:70px;"></div>
+      <div><label>Prime q</label><input type="number" id="rk-q" value="11" style="width:70px;"></div>
+      <button class="btn btn-primary" onclick="rkLoad()" style="align-self:flex-end;">Load</button>
+      <button class="btn" onclick="rkReset()" style="align-self:flex-end;">Reset</button>
+    </div>
+  </div>
+  <div class="grid2">
+    <div><div class="panel">
+      <div class="panel-title">Step-by-step computation</div>
+      <div id="rk-steps" style="margin-bottom:1rem;">Load a text and pattern to begin.</div>
+      <div class="panel-title">Enter your answer</div>
+      <div id="rk-input-area">
+        <div class="fb info" id="rk-fb">—</div>
+      </div>
+      <hr class="sep">
+      <div class="panel-title">Step log</div>
+      <div class="step-log" id="rk-log"></div>
+    </div></div>
+    <div><div class="panel">
+      <div class="panel-title">Reference formulas</div>
+      <div style="font-family:var(--mono);font-size:.78rem;color:var(--text2);line-height:2.2;">
+        p = Σ P[i]·d^(m-i) mod q<br>
+        h = d^(m-1) mod q<br>
+        t₀ = Σ T[i]·d^(m-i) mod q<br>
+        tₛ₊₁ = (d·(tₛ − T[s+1]·h) + T[s+m+1]) mod q<br>
+        <hr class="sep">
+        <span style="color:var(--text3);">Valid shift: if tₛ = p then check T[s+1..s+m] = P[1..m]</span>
+      </div>
+      <hr class="sep">
+      <div class="panel-title">Results</div>
+      <div id="rk-results"></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ KNAPSACK DP PAGE -->
+<div class="page" id="page-knapsack">
+  <div class="page-title">0/1 Knapsack DP</div>
+  <div class="page-sub">// fill the P[i,k] table — P(i,k) = max profit using items i..n with capacity k</div>
+  <div class="row mt1" style="margin-bottom:.75rem;">
+    <button class="btn btn-primary" onclick="ksNew()">New Problem</button>
+    <button class="btn" onclick="ksReset()">Reset</button>
+  </div>
+  <div class="grid2">
+    <div><div class="panel">
+      <div class="panel-title">Problem</div>
+      <div id="ks-problem" style="font-family:var(--mono);font-size:.85rem;color:var(--text2);margin-bottom:1rem;line-height:1.8;">Press "New Problem" to begin.</div>
+      <div class="hint-box">Fill bottom-up from row n to row 1. For each cell P[i,k]: if wᵢ > k → copy P[i+1,k]. Else → max(P[i+1,k], pᵢ + P[i+1,k−wᵢ]).</div>
+      <div class="fb info" id="ks-fb">—</div>
+      <div class="panel-title">Click the cell to fill, then enter the value</div>
+      <div class="row" style="margin-bottom:.75rem;">
+        <span id="ks-current-cell" style="font-family:var(--mono);font-size:.82rem;color:var(--text3);">—</span>
+        <input type="number" id="ks-cell-val" placeholder="0" style="width:80px;">
+        <button class="btn btn-primary" onclick="ksFillCell()">Fill</button>
+      </div>
+      <hr class="sep">
+      <div class="panel-title">Step log</div>
+      <div class="step-log" id="ks-log"></div>
+    </div></div>
+    <div><div class="panel">
+      <div class="panel-title">Table P[i,k]</div>
+      <div class="dp-table-wrap" id="ks-table-wrap">—</div>
+      <div class="done-banner" id="ks-done">✓ Table complete! Optimal profit = P[1,C]</div>
+      <div id="ks-traceback" style="display:none;margin-top:1rem;">
+        <div class="panel-title">Optimal items</div>
+        <div id="ks-items" style="font-family:var(--mono);font-size:.85rem;color:var(--green);"></div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ LCS PAGE -->
+<div class="page" id="page-lcs">
+  <div class="page-title">Longest Common Subsequence</div>
+  <div class="page-sub">// fill c[i,j] table — c[i,j] = length of LCS of X[1..i] and Y[1..j]</div>
+  <div class="row mt1" style="margin-bottom:.75rem;">
+    <button class="btn btn-primary" onclick="lcsNew()">New Problem</button>
+    <button class="btn" onclick="lcsReset()">Reset</button>
+  </div>
+  <div class="grid2">
+    <div><div class="panel">
+      <div class="panel-title">Problem</div>
+      <div id="lcs-problem" style="font-family:var(--mono);font-size:.85rem;color:var(--text2);margin-bottom:1rem;line-height:1.8;">Press "New Problem" to begin.</div>
+      <div class="hint-box">
+        If X[i]=Y[j]: c[i,j] = c[i-1,j-1] + 1<br>
+        Else: c[i,j] = max(c[i-1,j], c[i,j-1])<br>
+        Row 0 and Col 0 are always 0.
+      </div>
+      <div class="fb info" id="lcs-fb">—</div>
+      <div class="row" style="margin-bottom:.75rem;">
+        <span id="lcs-current-cell" style="font-family:var(--mono);font-size:.82rem;color:var(--text3);">—</span>
+        <input type="number" id="lcs-cell-val" placeholder="0" style="width:80px;">
+        <button class="btn btn-primary" onclick="lcsFillCell()">Fill</button>
+      </div>
+      <hr class="sep">
+      <div class="panel-title">Step log</div>
+      <div class="step-log" id="lcs-log"></div>
+    </div></div>
+    <div><div class="panel">
+      <div class="panel-title">Table c[i,j]</div>
+      <div class="dp-table-wrap" id="lcs-table-wrap">—</div>
+      <div class="done-banner" id="lcs-done">✓ Table complete!</div>
+      <div id="lcs-result" style="display:none;font-family:var(--mono);font-size:.85rem;color:var(--green);margin-top:1rem;"></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ MATRIX CHAIN PAGE -->
+<div class="page" id="page-matchain">
+  <div class="page-title">Matrix Chain Multiplication</div>
+  <div class="page-sub">// fill m[i,j] = min scalar multiplications to compute Aᵢ..Aⱼ</div>
+  <div class="row mt1" style="margin-bottom:.75rem;">
+    <button class="btn btn-primary" onclick="mcNew()">New Problem</button>
+    <button class="btn" onclick="mcReset()">Reset</button>
+  </div>
+  <div class="grid2">
+    <div><div class="panel">
+      <div class="panel-title">Problem</div>
+      <div id="mc-problem" style="font-family:var(--mono);font-size:.85rem;color:var(--text2);margin-bottom:1rem;line-height:1.8;">Press "New Problem" to begin.</div>
+      <div class="hint-box">
+        Diagonal d=1 first (m[i,i]=0). Then d=2,3,...<br>
+        m[i,j] = min over i≤k&lt;j of: m[i,k] + m[k+1,j] + p[i-1]·p[k]·p[j]
+      </div>
+      <div class="fb info" id="mc-fb">—</div>
+      <div class="row" style="margin-bottom:.75rem;">
+        <span id="mc-current-cell" style="font-family:var(--mono);font-size:.82rem;color:var(--text3);">—</span>
+        <input type="number" id="mc-cell-val" placeholder="0" style="width:100px;">
+        <button class="btn btn-primary" onclick="mcFillCell()">Fill</button>
+      </div>
+      <hr class="sep">
+      <div class="panel-title">Step log</div>
+      <div class="step-log" id="mc-log"></div>
+    </div></div>
+    <div><div class="panel">
+      <div class="panel-title">Table m[i,j]</div>
+      <div class="dp-table-wrap" id="mc-table-wrap">—</div>
+      <div class="done-banner" id="mc-done">✓ Table complete!</div>
+      <div id="mc-result" style="display:none;font-family:var(--mono);font-size:.85rem;color:var(--green);margin-top:1rem;"></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ PARALLEL PAGE -->
+<div class="page" id="page-parallel">
+  <div class="page-title">PRAM Analysis</div>
+  <div class="page-sub">// compute T, P, C, S, E — and determine cost optimality</div>
+  <div class="row mt1" style="margin-bottom:1.5rem;">
+    <button class="btn btn-primary" onclick="parNew()">New Problem</button>
+    <button class="btn" onclick="parReset()">Reset</button>
+    <span class="quiz-score">Score: <span class="score-num" id="par-correct">0</span> / <span id="par-total">0</span></span>
+  </div>
+  <div class="grid2">
+    <div><div class="panel">
+      <div class="panel-title">Scenario</div>
+      <div class="quiz-q" id="par-q" style="white-space:pre-line;">Press "New Problem" to begin.</div>
+      <div class="panel-title mt2">Your answers</div>
+      <div class="par-fields">
+        <div class="par-field"><label>T(n) — parallel time</label><input type="text" id="par-tn" placeholder="e.g. O(log n)"></div>
+        <div class="par-field"><label>P(n) — processors</label><input type="text" id="par-pn" placeholder="e.g. O(n)"></div>
+        <div class="par-field"><label>C(n) = P(n)×T(n)</label><input type="text" id="par-cn" placeholder="e.g. O(n log n)"></div>
+        <div class="par-field"><label>T*(n) — best sequential</label><input type="text" id="par-tstar" placeholder="e.g. O(n)"></div>
+        <div class="par-field"><label>S(n) = T*/T</label><input type="text" id="par-sn" placeholder="e.g. n/log n"></div>
+        <div class="par-field"><label>E(n) = T*/C</label><input type="text" id="par-en" placeholder="e.g. 1/log n"></div>
+      </div>
+      <div class="row" style="margin-bottom:.75rem;">
+        <span style="font-family:var(--mono);font-size:.82rem;color:var(--text2);">Cost optimal?</span>
+        <button class="btn" id="par-yes" onclick="parSetOpt(true)">Yes</button>
+        <button class="btn" id="par-no" onclick="parSetOpt(false)">No</button>
+      </div>
+      <div class="row" style="margin-bottom:.75rem;">
+        <span style="font-family:var(--mono);font-size:.82rem;color:var(--text2);">Cost efficient?</span>
+        <button class="btn" id="par-eff-yes" onclick="parSetEff(true)">Yes</button>
+        <button class="btn" id="par-eff-no" onclick="parSetEff(false)">No</button>
+      </div>
+      <button class="btn btn-primary" onclick="parCheck()">Check all answers</button>
+      <div class="fb info" id="par-fb" style="margin-top:.75rem;"></div>
+    </div></div>
+    <div><div class="panel">
+      <div class="panel-title">Results</div>
+      <div id="par-results" style="font-family:var(--mono);font-size:.82rem;color:var(--text2);line-height:2;">Submit to see results.</div>
+      <hr class="sep">
+      <div class="panel-title">Reference</div>
+      <div style="font-family:var(--mono);font-size:.78rem;color:var(--text2);line-height:2.2;">
+        S(n) = T*(n) / T(n)<br>
+        C(n) = P(n) × T(n)<br>
+        E(n) = T*(n) / C(n) = S(n) / P(n)<br>
+        Cost optimal: C(n) = T*(n)  i.e. E(n) = 1<br>
+        Cost efficient: C(n) within O(log^k n) of T*(n)
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ QUIZ PAGE -->
+<div class="page" id="page-quiz">
+  <div class="page-title">Quick Quiz</div>
+  <div class="page-sub">// multiple choice — tests concepts and algorithm knowledge across all topics</div>
+  <div class="row mt1" style="margin-bottom:1.5rem;">
+    <button class="btn btn-primary" onclick="quizNext()">New Question</button>
+    <span class="quiz-score">Score: <span class="score-num" id="quiz-correct">0</span> / <span id="quiz-total">0</span></span>
+    <button class="btn" onclick="quizReset()">Reset score</button>
+  </div>
+  <div class="panel" style="max-width:700px;">
+    <div class="exam-q-label" id="quiz-topic-label">—</div>
+    <div class="quiz-q" id="quiz-q">Press "New Question" to begin.</div>
+    <div class="mc-options" id="quiz-opts"></div>
+    <div class="fb info" id="quiz-fb" style="display:none;"></div>
+    <div class="row mt1">
+      <button class="btn btn-primary" id="quiz-next-btn" onclick="quizNext()" style="display:none;">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ EXAM MODE PAGE -->
+<div class="page" id="page-exam">
+  <div class="page-title">⚡ Exam Mode</div>
+  <div class="page-sub">// randomised questions from all topics — mark complete when done</div>
+  <div id="exam-setup">
+    <div class="panel-title mt2">Select topics to include</div>
+    <div class="topic-select-grid" id="exam-topic-grid"></div>
+    <div class="row">
+      <button class="btn btn-amber" onclick="examStart()">Start Exam Session</button>
+      <button class="btn" onclick="examSelectAll()">Select all</button>
+      <button class="btn" onclick="examSelectNone()">Clear</button>
+    </div>
+  </div>
+  <div id="exam-active" style="display:none;">
+    <div class="exam-header">
+      <div>
+        <div class="exam-title">⚡ EXAM MODE</div>
+        <div class="exam-progress" id="exam-prog">Question 1</div>
+      </div>
+      <div class="row">
+        <button class="btn btn-green" id="exam-next-btn" onclick="examNext()" style="display:none;">Next question →</button>
+        <button class="btn" onclick="examEnd()">End session</button>
+      </div>
+    </div>
+    <div class="exam-q-label" id="exam-topic-label">—</div>
+    <div id="exam-q-container"></div>
+  </div>
+  <div id="exam-results" style="display:none;">
+    <div class="panel" style="max-width:500px;">
+      <div class="panel-title">Session complete</div>
+      <div style="font-family:var(--mono);font-size:2rem;font-weight:700;color:var(--amber);margin-bottom:.5rem;" id="exam-score-display">—</div>
+      <div style="font-family:var(--mono);font-size:.85rem;color:var(--text2);margin-bottom:1.5rem;" id="exam-score-detail"></div>
+      <div class="row"><button class="btn btn-amber" onclick="examRestart()">New session</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════ UTILITIES
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function log2(x){return Math.log(x)/Math.log(2);}
+function setFB(id,type,msg){const el=document.getElementById(id);if(!el)return;el.className='fb '+type;el.textContent=msg;}
+function setFBEl(el,type,msg){el.className='fb '+type;el.textContent=msg;}
+function addLog(id,type,msg){const el=document.getElementById(id);if(!el)return;const d=document.createElement('div');d.className=type;d.textContent=msg;el.appendChild(d);el.scrollTop=el.scrollHeight;}
+function parseSyms(raw){const parts=raw.split(',');const r=[];for(const p of parts){const m=p.trim().match(/^([^=]+)=(\d+(\.\d+)?)$/);if(m)r.push({label:m[1].trim(),freq:parseFloat(m[2])});}return r;}
+function mkNode(label,freq,isLeaf,left=null,right=null){return{id:Math.random(),label,freq,isLeaf,left,right};}
+function mkP3Node(label,depth,isLeaf,left=null,right=null){return{id:Math.random(),label,depth,isLeaf,left,right};}
+function normaliseComplexity(s){return s.replace(/\s+/g,'').toLowerCase().replace('theta','θ').replace('omega','ω').replace('Θ','θ').replace('Ω','ω').replace('O(','o(').replace(/×/g,'*').replace(/·/g,'*');}
+function complexEq(a,b){return normaliseComplexity(a)===normaliseComplexity(b);}
+
+// ═══════════════════════════════════════════════════ NAV
+// Map each page to its week group
+const PAGE_WEEK={huffman:'w7',hutcker:'w7',gzip:'w7',entropy:'w7',decode:'w7',master:'rev',recurrence:'rev',rabinkarp:'w8',knapsack:'w910',lcs:'w910',matchain:'w910',parallel:'w11',quiz:'special',exam:'special'};
+function switchWeek(wk){
+  document.querySelectorAll('.week-tab').forEach(t=>t.classList.remove('active'));
+  const wb=document.getElementById('wtab-'+wk);if(wb)wb.classList.add('active');
+  document.querySelectorAll('.week-topics').forEach(t=>t.classList.remove('active'));
+  const wt=document.getElementById('wtopics-'+wk);if(wt)wt.classList.add('active');
+  // Auto-navigate to first topic in the week if not already on one in that week
+  const firstTab=wt&&wt.querySelector('.topic-tab');
+  if(firstTab){const page=firstTab.getAttribute('data-page');if(page)showPageOnly(page);}
+}
+function showPageOnly(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById('page-'+name);if(pg)pg.classList.add('active');
+  // Update topic tab active state
+  document.querySelectorAll('.topic-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.topic-tab[data-page="'+name+'"]').forEach(t=>t.classList.add('active'));
+}
+function showPage(name){
+  // Ensure correct week tab + topic row is shown
+  const wk=PAGE_WEEK[name]||'w7';
+  document.querySelectorAll('.week-tab').forEach(t=>t.classList.remove('active'));
+  const wb=document.getElementById('wtab-'+wk);if(wb)wb.classList.add('active');
+  document.querySelectorAll('.week-topics').forEach(t=>t.classList.remove('active'));
+  const wt=document.getElementById('wtopics-'+wk);if(wt)wt.classList.add('active');
+  showPageOnly(name);
+}
+
+// ═══════════════════════════════════════════════════ SVG TREE
+const NW=90,NH=28,HG=16,VG=44;
+function treeLayout(n){if(!n.left&&!n.right){n._w=NW;n._cx=NW/2;return;}treeLayout(n.left);treeLayout(n.right);const lw=n.left._w;n._w=lw+HG+n.right._w;n._cx=(n.left._cx+lw+HG+n.right._cx)/2;}
+function assignPos(n,xOff,y){n._y=y;n._x=xOff+n._cx-NW/2;if(n.left){assignPos(n.left,xOff,y+NH+VG);assignPos(n.right,xOff+n.left._w+HG,y+NH+VG);}}
+function treeDepth(n){if(!n)return 0;return 1+Math.max(treeDepth(n.left),treeDepth(n.right));}
+function renderSVGTree(cid,nodes,labelFn,colorFn){const c=document.getElementById(cid);c.innerHTML='';if(!nodes||!nodes.length)return;const wrap=document.createElement('div');wrap.style.cssText='display:flex;flex-wrap:wrap;align-items:flex-start;';for(const root of nodes){treeLayout(root);const d=treeDepth(root);const sw=Math.max(root._w+20,NW+20);const sh=d*(NH+VG)+20;assignPos(root,10,10);const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('width',sw);svg.setAttribute('height',sh);svg.style.cssText='display:block;margin:4px 8px 4px 4px;flex-shrink:0;';drawNode(svg,root,labelFn,colorFn,nodes.length===1);wrap.appendChild(svg);}c.appendChild(wrap);}
+function drawNode(svg,n,lFn,cFn,isRoot){const cx=n._x+NW/2;if(n.left){drawLine(svg,cx,n._y+NH,n.left._x+NW/2,n.left._y);drawNode(svg,n.left,lFn,cFn,false);drawLine(svg,cx,n._y+NH,n.right._x+NW/2,n.right._y);drawNode(svg,n.right,lFn,cFn,false);}const col=cFn(n,isRoot);const rx=n.isLeaf?4:12;const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');rect.setAttribute('x',n._x);rect.setAttribute('y',n._y);rect.setAttribute('width',NW);rect.setAttribute('height',NH);rect.setAttribute('rx',rx);rect.setAttribute('fill',col.fill);rect.setAttribute('stroke',col.stroke);rect.setAttribute('stroke-width','1.5');svg.appendChild(rect);const txt=document.createElementNS('http://www.w3.org/2000/svg','text');txt.setAttribute('x',cx);txt.setAttribute('y',n._y+NH/2+4);txt.setAttribute('text-anchor','middle');txt.setAttribute('font-family','JetBrains Mono,monospace');txt.setAttribute('font-size','11');txt.setAttribute('fill',col.text);txt.textContent=lFn(n);svg.appendChild(txt);}
+function drawLine(svg,x1,y1,x2,y2){const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);l.setAttribute('stroke','#383c47');l.setAttribute('stroke-width','1.5');svg.appendChild(l);}
+const COLS={huff:(n,r)=>r?{fill:'#0e3322',stroke:'#3dd68c',text:'#3dd68c'}:n.isLeaf?{fill:'#1a2f5a',stroke:'#4f8ef7',text:'#4f8ef7'}:{fill:'#1e2026',stroke:'#383c47',text:'#9095a5'},ht:(n,r)=>r?{fill:'#0e3322',stroke:'#3dd68c',text:'#3dd68c'}:n.isLeaf?{fill:'#1a2f5a',stroke:'#4f8ef7',text:'#4f8ef7'}:{fill:'#2a1f4a',stroke:'#a78bfa',text:'#a78bfa'},p3:(n,r)=>r?{fill:'#0e3322',stroke:'#3dd68c',text:'#3dd68c'}:n.isLeaf?{fill:'#0a2e2a',stroke:'#2dd4bf',text:'#2dd4bf'}:{fill:'#1e2026',stroke:'#383c47',text:'#9095a5'},};
+
+// ═══════════════════════════════════════════════════ PRESET IMPORTS
+// Shared helpers
+const SYMS='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+function randInt(lo,hi){return lo+Math.floor(Math.random()*(hi-lo+1));}
+function randSymFreqs(minS,maxS,minF,maxF){
+  const n=randInt(minS,maxS);
+  const used=[];
+  // pick n distinct letters
+  const pool=SYMS.split('');shuffle(pool);
+  const letters=pool.slice(0,n).sort(); // keep alphabetical order for HT
+  return letters.map(l=>l+'='+randInt(minF,maxF)).join(', ');
+}
+// Huffman: 4-8 symbols, freqs 1-20
+function huffImport(n){
+  const v=randSymFreqs(n,n,1,20);
+  document.getElementById('huff-input').value=v;huffLoad();
+}
+function htImport(n){
+  const v=randSymFreqs(n,n,1,12);
+  document.getElementById('ht-input').value=v;htLoad();
+}
+function gzipImport(targetLen){
+  const alphabets=['ABC','AB','ABCD','XYZ','MN'];
+  const base=alphabets[randInt(0,alphabets.length-1)];
+  let s='';
+  while(s.length<targetLen){
+    if(s.length>=2&&Math.random()<0.4){
+      const chunkLen=randInt(1,Math.min(3,s.length));
+      const start=randInt(0,s.length-chunkLen);
+      s+=s.substring(start,start+chunkLen);
+    } else {
+      s+=base[randInt(0,base.length-1)];
+    }
+  }
+  s=s.substring(0,targetLen).toUpperCase();
+  document.getElementById('gzip-input').value=s;gzipLoad(s);
+}
+function entImport(n){
+  const v=randSymFreqs(n,n,1,15);
+  document.getElementById('ent-input').value=v;entropyCalc();
+}
+function decImport(n){
+  const v=randSymFreqs(n,n,1,18);
+  document.getElementById('dec-syms').value=v;decodeLoad();
+}
+
+// ═══════════════════════════════════════════════════ HUFFMAN
+let hNodes=[],hSel=[],hOrigOrder=[];
+function huffLoad(raw){const inp=raw||document.getElementById('huff-input').value.trim();if(!inp)return;huffReset();const parsed=parseSyms(inp);if(parsed.length<2){alert('Need ≥2 symbols');return;}hOrigOrder=parsed.map(p=>p.label);hNodes=parsed.map(p=>mkNode(p.label,p.freq,true));shuffle(hNodes);renderHuffPool();renderSVGTree('huff-tree',hNodes,n=>n.label+':'+n.freq,COLS.huff);setFB('huff-fb','info','Select the two nodes to merge.');}
+function huffReset(){hNodes=[];hSel=[];['huff-pool','huff-tree','huff-codes','huff-log'].forEach(id=>document.getElementById(id)&&(document.getElementById(id).innerHTML=''));const db=document.getElementById('huff-done');if(db)db.style.display='none';setFB('huff-fb','info','Load symbols to begin.');updateHSel();const mb=document.getElementById('huff-merge-btn');if(mb)mb.disabled=true;}
+function renderHuffPool(){const pool=document.getElementById('huff-pool');pool.innerHTML='';hNodes.forEach(n=>{const b=document.createElement('button');b.className='node-chip '+(n.isLeaf?'square':'circular');b.textContent=n.label+':'+n.freq;if(hSel.find(s=>s.id===n.id))b.classList.add('selected');b.onclick=()=>hToggle(n);pool.appendChild(b);});}
+function hToggle(n){const i=hSel.findIndex(s=>s.id===n.id);if(i>=0)hSel.splice(i,1);else{if(hSel.length>=2)hSel.shift();hSel.push(n);}updateHSel();renderHuffPool();}
+function updateHSel(){const[a,b]=hSel;const sa=document.getElementById('hsel-a'),sb=document.getElementById('hsel-b'),ss=document.getElementById('hsel-sum');if(sa){sa.textContent=a?a.label+':'+a.freq:'—';sa.className='sel-slot'+(a?' filled':'');}if(sb){sb.textContent=b?b.label+':'+b.freq:'—';sb.className='sel-slot'+(b?' filled':'');}if(ss)ss.textContent=(a&&b)?(a.freq+b.freq):'?';const mb=document.getElementById('huff-merge-btn');if(mb)mb.disabled=hSel.length<2;}
+function huffClearSel(){hSel=[];updateHSel();renderHuffPool();}
+function getCorrectHuff(){const s=[...hNodes].sort((a,b)=>a.freq-b.freq||hNodes.indexOf(a)-hNodes.indexOf(b));return[s[0],s[1]];}
+function huffMerge(){if(hSel.length<2)return;const[uA,uB]=hSel;const[cA,cB]=getCorrectHuff();if(!(new Set([uA.id,uB.id])).has(cA.id)||!(new Set([uA.id,uB.id])).has(cB.id)){setFB('huff-fb','err','✗ Wrong. Expected: '+cA.label+':'+cA.freq+' + '+cB.label+':'+cB.freq+' = '+(cA.freq+cB.freq));addLog('huff-log','err','✗ Wrong pair');return;}const merged=mkNode('('+cA.label+'+'+cB.label+')',cA.freq+cB.freq,false,cA,cB);const loIdx=Math.min(hNodes.indexOf(cA),hNodes.indexOf(cB));hNodes=hNodes.filter(n=>n.id!==cA.id&&n.id!==cB.id);hNodes.splice(loIdx,0,merged);hSel=[];setFB('huff-fb','ok','✓ '+cA.label+':'+cA.freq+' + '+cB.label+':'+cB.freq+' → '+merged.freq);addLog('huff-log','ok','✓ '+cA.label+'+'+cB.label+'='+merged.freq);updateHSel();renderHuffPool();renderSVGTree('huff-tree',hNodes,n=>n.label+':'+n.freq,COLS.huff);if(hNodes.length===1)huffFinalize();}
+function huffFinalize(){const root=hNodes[0];const cm={};getCodes(root,'',cm);const el=document.getElementById('huff-codes');if(!el)return;el.innerHTML='';hOrigOrder.forEach(sym=>{if(cm[sym]===undefined)return;const c=document.createElement('div');c.className='code-card';c.innerHTML='<div class="code-sym">'+sym+'</div><div class="code-bits">'+cm[sym]+'</div><div class="code-len">'+cm[sym].length+' bit'+(cm[sym].length!==1?'s':'')+'</div>';el.appendChild(c);});const db=document.getElementById('huff-done');if(db)db.style.display='block';setFB('huff-fb','ok','✓ Complete!');addLog('huff-log','ok','✓ Root:'+root.freq);if(examActive)examTaskDone();}
+function getCodes(n,p,m){if(!n)return;if(n.isLeaf){m[n.label]=p||'0';return;}getCodes(n.left,p+'0',m);getCodes(n.right,p+'1',m);}
+
+// ═══════════════════════════════════════════════════ HU-TUCKER
+let htNodes=[],htSel=[],htP1Tree=null,htOrig=[],p3Nodes=[],p3Sel=[];
+function htLoad(raw){const inp=raw||document.getElementById('ht-input').value.trim();if(!inp)return;htReset();const parsed=parseSyms(inp);if(parsed.length<2){alert('Need ≥2 symbols');return;}htOrig=parsed.map(p=>p.label);htNodes=parsed.map(p=>mkNode(p.label,p.freq,true));renderHtPool();renderSVGTree('ht-tree',htNodes,n=>n.label+':'+n.freq,COLS.ht);setFB('ht-fb','info','Select a compatible pair to merge.');}
+function htReset(){htNodes=[];htSel=[];htP1Tree=null;p3Nodes=[];p3Sel=[];['ht-pool','ht-tree','ht-log','ht-p2-content','p3-pool','p3-tree','p3-codes','p3-log'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML='';});['ht-p1-done','ht-p2-done','ht-p3-done'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});setFB('ht-fb','info','Load symbols to begin.');setFB('p3-fb','info','Select two adjacent nodes at the same depth.');updateHtSel();updateP3Sel();const mb=document.getElementById('ht-merge-btn');if(mb)mb.disabled=true;const pb=document.getElementById('p3-merge-btn');if(pb)pb.disabled=true;htSetPhase(1);const p2=document.getElementById('ptab-2'),p3=document.getElementById('ptab-3');if(p2){p2.disabled=true;p2.className='phase-tab';}if(p3){p3.disabled=true;p3.className='phase-tab';}}
+function htSetPhase(p){['ht-phase1','ht-phase2','ht-phase3'].forEach((id,i)=>{const e=document.getElementById(id);if(e)e.style.display=i+1===p?'':'none';});if(p===2&&htP1Tree)htShowP2();if(p===3){renderP3Pool();renderSVGTree('p3-tree',p3Nodes,n=>n.label+'(d='+n.depth+')',COLS.p3);}}
+function renderHtPool(){const pool=document.getElementById('ht-pool');if(!pool)return;pool.innerHTML='';htNodes.forEach(n=>{const b=document.createElement('button');b.className='node-chip '+(n.isLeaf?'square':'circular');b.textContent=n.label+':'+n.freq;if(htSel.find(s=>s.id===n.id))b.classList.add('selected');b.onclick=()=>htToggle(n);pool.appendChild(b);});}
+function htToggle(n){const i=htSel.findIndex(s=>s.id===n.id);if(i>=0)htSel.splice(i,1);else{if(htSel.length>=2)htSel.shift();htSel.push(n);}updateHtSel();renderHtPool();}
+function updateHtSel(){const[a,b]=htSel;const sa=document.getElementById('htsel-a'),sb=document.getElementById('htsel-b'),ss=document.getElementById('htsel-sum');if(sa){sa.textContent=a?a.label+':'+a.freq:'—';sa.className='sel-slot'+(a?' filled':'');}if(sb){sb.textContent=b?b.label+':'+b.freq:'—';sb.className='sel-slot'+(b?' filled':'');}if(ss)ss.textContent=(a&&b)?(a.freq+b.freq):'?';const mb=document.getElementById('ht-merge-btn');if(mb)mb.disabled=htSel.length<2;}
+function htClearSel(){htSel=[];updateHtSel();renderHtPool();}
+function isCompat(iA,iB){const lo=Math.min(iA,iB),hi=Math.max(iA,iB);for(let i=lo+1;i<hi;i++)if(htNodes[i].isLeaf)return false;return true;}
+function getCorrectHt(){let best=null,bf=Infinity,bi=Infinity;for(let i=0;i<htNodes.length;i++)for(let j=i+1;j<htNodes.length;j++){if(!isCompat(i,j))continue;const f=htNodes[i].freq+htNodes[j].freq;if(f<bf||(f===bf&&i<bi)){bf=f;bi=i;best=[htNodes[i],htNodes[j]];}}return best;}
+function htMerge(){if(htSel.length<2)return;const[uA,uB]=htSel;const iA=htNodes.indexOf(uA),iB=htNodes.indexOf(uB);if(!isCompat(iA,iB)){setFB('ht-fb','err','✗ Not compatible — square node between them.');addLog('ht-log','err','✗ Blocked');return;}const corr=getCorrectHt();const cs=corr[0].freq+corr[1].freq;const us=uA.freq+uB.freq;if(us>cs){setFB('ht-fb','err','✗ Not minimum. Expected: '+corr[0].label+':'+corr[0].freq+' + '+corr[1].label+':'+corr[1].freq+' = '+cs);addLog('ht-log','err','✗ Wrong pair');return;}const corrLoIdx=Math.min(htNodes.indexOf(corr[0]),htNodes.indexOf(corr[1]));const userLoIdx=Math.min(iA,iB);if(us===cs&&userLoIdx>corrLoIdx){setFB('ht-fb','err','✗ Tie — pick leftmost. Expected: '+corr[0].label+' + '+corr[1].label);addLog('ht-log','err','✗ Not leftmost');return;}const loIdx=Math.min(iA,iB),hiIdx=Math.max(iA,iB);const lN=htNodes[loIdx],rN=htNodes[hiIdx];const merged=mkNode('('+lN.label+'+'+rN.label+')',lN.freq+rN.freq,false,lN,rN);htNodes.splice(hiIdx,1);htNodes.splice(loIdx,1);htNodes.splice(loIdx,0,merged);htSel=[];setFB('ht-fb','ok','✓ '+lN.label+':'+lN.freq+' + '+rN.label+':'+rN.freq+' → '+merged.freq);addLog('ht-log','ok','✓ '+lN.label+'+'+rN.label+'='+merged.freq);updateHtSel();renderHtPool();renderSVGTree('ht-tree',htNodes,n=>n.label+':'+n.freq,COLS.ht);if(htNodes.length===1){htP1Tree=htNodes[0];document.getElementById('ht-p1-done').style.display='block';setFB('ht-fb','ok','✓ Phase 1 done! Go to Phase 2.');addLog('ht-log','ok','✓ Done');const p2=document.getElementById('ptab-2');if(p2){p2.disabled=false;p2.className='phase-tab p2';}}}
+function buildDepthMap(n,d,m){if(!n)return;if(n.isLeaf){m[n.label]=d;return;}buildDepthMap(n.left,d+1,m);buildDepthMap(n.right,d+1,m);}
+function htShowP2(){const dm={};buildDepthMap(htP1Tree,0,dm);const c=document.getElementById('ht-p2-content');if(!c)return;c.innerHTML='';const row=document.createElement('div');row.className='depth-row';htOrig.forEach(sym=>{if(dm[sym]===undefined)return;const ch=document.createElement('span');ch.className='depth-chip';ch.textContent=sym+' → depth '+dm[sym];row.appendChild(ch);});c.appendChild(row);const db=document.getElementById('ht-p2-done');if(db)db.style.display='flex';const p3=document.getElementById('ptab-3');if(p3){p3.disabled=false;p3.className='phase-tab p3';}p3Nodes=htOrig.filter(s=>dm[s]!==undefined).map(s=>mkP3Node(s,dm[s],true));}
+function renderP3Pool(){const pool=document.getElementById('p3-pool');if(!pool)return;pool.innerHTML='';p3Nodes.forEach(n=>{const ch=document.createElement('div');ch.className='p3-chip'+(n.isLeaf?'':' int');ch.innerHTML='<span class="sym">'+n.label+'</span><span class="dep">d='+n.depth+'</span>';if(p3Sel.find(s=>s.id===n.id))ch.classList.add('selected');ch.onclick=()=>p3Toggle(n);pool.appendChild(ch);});}
+function p3Toggle(n){const i=p3Sel.findIndex(s=>s.id===n.id);if(i>=0)p3Sel.splice(i,1);else{if(p3Sel.length>=2)p3Sel.shift();p3Sel.push(n);}updateP3Sel();renderP3Pool();}
+function updateP3Sel(){const[a,b]=p3Sel;const sa=document.getElementById('p3sel-a'),sb=document.getElementById('p3sel-b');if(sa){sa.textContent=a?a.label+'(d='+a.depth+')':'—';sa.className='sel-slot'+(a?' filled':'');}if(sb){sb.textContent=b?b.label+'(d='+b.depth+')':'—';sb.className='sel-slot'+(b?' filled':'');}const mb=document.getElementById('p3-merge-btn');if(mb)mb.disabled=p3Sel.length<2;}
+function p3ClearSel(){p3Sel=[];updateP3Sel();renderP3Pool();}
+function getCorrectP3(){let maxD=Math.max(...p3Nodes.map(n=>n.depth));for(let d=maxD;d>=1;d--)for(let i=0;i<p3Nodes.length-1;i++)if(p3Nodes[i].depth===d&&p3Nodes[i+1].depth===d)return[p3Nodes[i],p3Nodes[i+1],d];return null;}
+function p3Merge(){if(p3Sel.length<2)return;const[uA,uB]=p3Sel;const iA=p3Nodes.indexOf(uA),iB=p3Nodes.indexOf(uB);const lo=Math.min(iA,iB),hi=Math.max(iA,iB);if(hi-lo!==1){setFB('p3-fb','err','✗ Nodes must be adjacent.');addLog('p3-log','err','✗ Not adjacent');return;}if(uA.depth!==uB.depth){setFB('p3-fb','err','✗ Must be same depth. Got d='+uA.depth+' and d='+uB.depth);addLog('p3-log','err','✗ Different depths');return;}const corr=getCorrectP3();if(!corr){setFB('p3-fb','ok','✓ Done!');return;}const[cA,cB,cd]=corr;if(uA.depth<cd){setFB('p3-fb','err','✗ Process deepest level first. Expected: '+cA.label+'(d='+cd+') + '+cB.label+'(d='+cd+')');addLog('p3-log','err','✗ Wrong level');return;}const corrLo=Math.min(p3Nodes.indexOf(cA),p3Nodes.indexOf(cB));if(uA.depth===cd&&lo>corrLo){setFB('p3-fb','err','✗ Pick leftmost at this depth. Expected: '+cA.label+' + '+cB.label);addLog('p3-log','err','✗ Not leftmost');return;}const lN=p3Nodes[lo],rN=p3Nodes[hi];const nd=lN.depth-1;const merged=mkP3Node('('+lN.label+'+'+rN.label+')',nd,false,lN,rN);p3Nodes.splice(hi,1);p3Nodes.splice(lo,1);p3Nodes.splice(lo,0,merged);p3Sel=[];setFB('p3-fb','ok','✓ '+lN.label+'(d='+lN.depth+') + '+rN.label+'(d='+rN.depth+') → (d='+nd+')');addLog('p3-log','ok','✓ merged(d='+nd+')');updateP3Sel();renderP3Pool();renderSVGTree('p3-tree',p3Nodes,n=>n.label+'(d='+n.depth+')',COLS.p3);if(p3Nodes.length===1)p3Finalize();}
+function p3Finalize(){const root=p3Nodes[0];const cm={};getCodesP3(root,'',cm);const el=document.getElementById('p3-codes');if(el){el.innerHTML='';htOrig.forEach(sym=>{if(cm[sym]===undefined)return;const c=document.createElement('div');c.className='code-card';c.innerHTML='<div class="code-sym">'+sym+'</div><div class="code-bits">'+cm[sym]+'</div><div class="code-len">'+cm[sym].length+' bit'+(cm[sym].length!==1?'s':'')+'</div>';el.appendChild(c);});}const db=document.getElementById('ht-p3-done');if(db)db.style.display='block';setFB('p3-fb','ok','✓ Hu-Tucker complete!');addLog('p3-log','ok','✓ Done');if(examActive)examTaskDone();}
+function getCodesP3(n,p,m){if(!n)return;if(n.isLeaf){m[n.label]=p||'0';return;}getCodesP3(n.left,p+'0',m);getCodesP3(n.right,p+'1',m);}
+
+// ═══════════════════════════════════════════════════ GZIP
+let gzStr='',gzPos=0,gzStream=[];
+function gzipLoad(raw){const inp=(raw||document.getElementById('gzip-input').value.trim()).toUpperCase();if(!inp)return;gzipReset();gzStr=inp;gzPos=0;gzStream=[];renderGzipDisplay();setFB('gzip-fb','info','Enter the pair for position 0: "'+gzStr[0]+'" (ASCII '+gzStr.charCodeAt(0)+')');document.getElementById('gzip-hint').textContent='Window so far: (empty). "'+gzStr[0]+'" is new — use (0, '+gzStr.charCodeAt(0)+'). ASCII of "'+gzStr[0]+'" = '+gzStr.charCodeAt(0)+'.';document.getElementById('gz-dist').value='0';document.getElementById('gz-len').value=gzStr.charCodeAt(0);}
+function gzipReset(){gzStr='';gzPos=0;gzStream=[];['gzip-display','gzip-stream','gzip-log'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML='';});document.getElementById('gzip-done').style.display='none';setFB('gzip-fb','info','Load a string.');document.getElementById('gzip-hint').textContent='Load a string to begin.';}
+function renderGzipDisplay(){const el=document.getElementById('gzip-display');if(!el)return;el.innerHTML='';for(let i=0;i<gzStr.length;i++){const s=document.createElement('span');s.className='gzip-char '+(i<gzPos?'done':i===gzPos?'current':'pending');s.textContent=gzStr[i];el.appendChild(s);}}
+function gzipSubmit(){if(gzPos>=gzStr.length)return;const d=parseInt(document.getElementById('gz-dist').value);const l=parseInt(document.getElementById('gz-len').value);if(isNaN(d)||isNaN(l)){setFB('gzip-fb','err','✗ Enter valid numbers.');return;}let bestDist=0,bestLen=0;for(let dist=1;dist<=gzPos;dist++){const startPos=gzPos-dist;let matchLen=0;while(gzPos+matchLen<gzStr.length&&gzStr[startPos+matchLen]===gzStr[gzPos+matchLen])matchLen++;if(matchLen>bestLen){bestLen=matchLen;bestDist=dist;}}const isNew=bestLen===0;const corrD=isNew?0:bestDist;const corrL=isNew?gzStr.charCodeAt(gzPos):bestLen;if(d!==corrD||l!==corrL){setFB('gzip-fb','err','✗ Expected ('+corrD+', '+corrL+')'+(isNew?' — new char, ASCII '+corrL:' — back '+corrD+', copy '+corrL));addLog('gzip-log','err','✗ Got ('+d+','+l+') expected ('+corrD+','+corrL+')');return;}const chars=isNew?1:bestLen;gzStream.push({d:corrD,l:corrL,isNew,chars:gzStr.substring(gzPos,gzPos+chars)});addLog('gzip-log','ok','✓ ('+corrD+','+corrL+') — '+(isNew?'"'+gzStr[gzPos]+'" new char':'back '+corrD+', copy "'+gzStr.substring(gzPos,gzPos+chars)+'"'));gzPos+=chars;document.getElementById('gz-dist').value='';document.getElementById('gz-len').value='';renderGzipDisplay();renderGzipStream();if(gzPos>=gzStr.length){setFB('gzip-fb','ok','✓ Encoding complete!');document.getElementById('gzip-done').style.display='block';if(examActive)examTaskDone();}else{const cur=gzStr[gzPos];const ascii=gzStr.charCodeAt(gzPos);setFB('gzip-fb','info','Position '+gzPos+': "'+cur+'" (ASCII '+ascii+')');document.getElementById('gzip-hint').textContent='Window: "'+gzStr.substring(0,gzPos)+'" — Does "'+cur+'" appear? If yes, find longest match and use (dist, len). If no, use (0, '+ascii+').';document.getElementById('gz-dist').value='0';document.getElementById('gz-len').value=ascii;}}
+function renderGzipStream(){const el=document.getElementById('gzip-stream');if(!el)return;el.innerHTML='';gzStream.forEach(p=>{const s=document.createElement('span');s.className='stream-pair '+(p.isNew?'new-char':'backref');s.textContent='('+p.d+','+p.l+')';el.appendChild(s);});}
+
+// ═══════════════════════════════════════════════════ ENTROPY
+// ═══════════════════════════════════════════════════ ENTROPY ENGINE
+let entSyms=[],entN=0,entH=0,entNH=0,entNOk=false,entNHOk=false;
+
+// Preset problems
+const ENT_EASY=[
+  {syms:'A=4, B=4, C=4, D=4',hint:'All equal frequencies — uniform distribution. H = log₂(n). Total N=16.'},
+  {syms:'A=8, B=4, C=4',hint:'Powers of 2 make this clean. Each pᵢ is a nice fraction. Total N=16.'},
+  {syms:'A=2, B=2, C=2, D=2',hint:'Uniform over 4 symbols. Answer should be exactly 2 bits/symbol.'},
+];
+const ENT_MEDIUM=[
+  {syms:'A=5, B=2, C=2, D=1, E=1',hint:'N=11. Use N·H = N·log₂N − Σfᵢ·log₂fᵢ to avoid messy fractions.'},
+  {syms:'A=6, B=3, C=2, D=1',hint:'N=12. Mix of frequencies. Work out each −pᵢlog₂pᵢ term separately.'},
+  {syms:'A=10, B=4, C=3, D=2, E=1',hint:'N=20. Five symbols with a dominant one. H will be less than log₂(5).'},
+];
+const ENT_HARD=[
+  {syms:'A=14, B=2, C=7, D=3, E=11, F=1',hint:'N=38. Six symbols, no clean fractions. Expect H ≈ 2.3-2.5 bits/symbol.'},
+  {syms:'A=45, B=13, C=12, D=16, E=9, F=5',hint:'N=100. The CLRS Huffman example. Clean percentages! p_A=0.45 etc.'},
+  {syms:'A=7, B=6, C=5, D=4, E=3, F=2, G=1',hint:'N=28. Seven symbols in descending freq. Work row by row carefully.'},
+];
+
+function entLoadDifficulty(diff){
+  const banks={easy:ENT_EASY,medium:ENT_MEDIUM,hard:ENT_HARD};
+  const prob=pick(banks[diff]);
+  // Highlight active button
+  ['easy','medium','hard'].forEach(d=>{
+    const b=document.getElementById('entbtn-'+d);
+    if(b){b.style.borderColor=d===diff?'var(--accent)':'';b.style.color=d===diff?'var(--accent)':'';}
+  });
+  const panel=document.getElementById('ent-problem-panel');if(panel)panel.style.display='block';
+  const badge=document.getElementById('ent-diff-badge');
+  if(badge){badge.className='ent-diff-badge '+diff;badge.textContent=diff.toUpperCase();}
+  document.getElementById('ent-problem-text').textContent='Calculate H for: '+prob.syms;
+  document.getElementById('ent-problem-hint').textContent='Hint: '+prob.hint;
+  document.getElementById('ent-input').value=prob.syms;
+  entLoadSyms(prob.syms);
+}
+function entLoadCustom(){
+  const v=document.getElementById('ent-input').value.trim();
+  if(!v)return;
+  const panel=document.getElementById('ent-problem-panel');if(panel)panel.style.display='none';
+  ['easy','medium','hard'].forEach(d=>{const b=document.getElementById('entbtn-'+d);if(b){b.style.borderColor='';b.style.color='';}});
+  entLoadSyms(v);
+}
+function entImport(n){
+  const v=randSymFreqs(n,n,1,15);
+  document.getElementById('ent-input').value=v;
+  const panel=document.getElementById('ent-problem-panel');if(panel)panel.style.display='none';
+  ['easy','medium','hard'].forEach(d=>{const b=document.getElementById('entbtn-'+d);if(b){b.style.borderColor='';b.style.color='';}});
+  entLoadSyms(v);
+}
+function entLoadSyms(raw){
+  entropyReset();
+  const parsed=parseSyms(raw);if(!parsed.length)return;
+  entSyms=parsed;
+  entN=parsed.reduce((s,p)=>s+p.freq,0);
+  entH=0;parsed.forEach(p=>{const pr=p.freq/entN;entH+=-pr*log2(pr);});
+  entNH=entN*entH;
+  entNOk=false;entNHOk=false;
+  // Show problem freq display
+  const freqStr=parsed.map(p=>p.label+': freq='+p.freq).join('  |  ');
+  document.getElementById('ent-qa-freqs').textContent='Symbols: '+freqStr;
+  document.getElementById('ent-qa-area').style.display='block';
+  document.getElementById('ent-working-area').style.display='none';
+  document.getElementById('ent-ans-n').value='';
+  document.getElementById('ent-ans-nh').value='';
+  document.getElementById('ent-ans-h').value='';
+  setFB('ent-fb-n','info','');setFB('ent-fb-nh','info','');setFB('ent-fb-h','info','');
+  document.getElementById('ent-row-nh').style.opacity='0.35';
+  document.getElementById('ent-row-h').style.opacity='0.35';
+  // Interpretation panel
+  document.getElementById('ent-explain').innerHTML=
+    'Total N = '+entN+'<br>'+
+    'Entropy H ≈ ??? bits/symbol<br>'+
+    'Min total bits ≈ ??? <br><br>'+
+    'Work through the steps, then hit "Show full working" to check.';
+}
+function entCheckN(){
+  const val=parseInt(document.getElementById('ent-ans-n').value);
+  if(isNaN(val)){setFB('ent-fb-n','err','Enter a number.');return;}
+  if(val===entN){
+    setFB('ent-fb-n','ok','✓ Correct — N = '+entN);
+    entNOk=true;
+    document.getElementById('ent-row-nh').style.opacity='1';
+  } else {
+    setFB('ent-fb-n','err','✗ Got '+val+'. Sum all frequencies.');
+  }
+}
+function entCheckNH(){
+  if(!entNOk){setFB('ent-fb-nh','warn','Check N first.');return;}
+  const val=parseFloat(document.getElementById('ent-ans-nh').value);
+  if(isNaN(val)){setFB('ent-fb-nh','err','Enter a number.');return;}
+  const tol=entNH*0.01+0.05; // 1% + small absolute
+  if(Math.abs(val-entNH)<=tol){
+    setFB('ent-fb-nh','ok','✓ Correct — N·H ≈ '+entNH.toFixed(3));
+    entNHOk=true;
+    document.getElementById('ent-row-h').style.opacity='1';
+  } else {
+    setFB('ent-fb-nh','err','✗ Got '+val.toFixed(3)+'. Expected ≈ '+entNH.toFixed(3)+'. Check your −fᵢ·log₂(fᵢ/N) terms.');
+  }
+}
+function entCheckH(){
+  if(!entNHOk){setFB('ent-fb-h','warn','Check N·H first.');return;}
+  const val=parseFloat(document.getElementById('ent-ans-h').value);
+  if(isNaN(val)){setFB('ent-fb-h','err','Enter a number.');return;}
+  const tol=0.02;
+  if(Math.abs(val-entH)<=tol){
+    setFB('ent-fb-h','ok','✓ H ≈ '+entH.toFixed(4)+' bits/symbol');
+    document.getElementById('ent-explain').innerHTML=
+      'N = '+entN+'<br>'+
+      'H = '+entH.toFixed(4)+' bits/symbol<br>'+
+      'Min total bits = '+entNH.toFixed(2)+'<br><br>'+
+      'Upper bound: log₂('+entSyms.length+') = '+log2(entSyms.length).toFixed(4)+' (uniform dist)<br>'+
+      'Any prefix code averages ≥ H bits/symbol.<br>'+
+      'Huffman gets within 1 bit of H.';
+    const btn=document.getElementById('ent-to-huff');if(btn)btn.style.display='inline-flex';
+    if(examActive)examTaskDone();
+  } else {
+    setFB('ent-fb-h','err','✗ Got '+val.toFixed(4)+'. Expected ≈ '+entH.toFixed(4)+'. H = N·H / N = '+entNH.toFixed(3)+' / '+entN+'.');
+  }
+}
+function entShowWorking(){
+  const tb=document.getElementById('ent-tbody');if(!tb)return;tb.innerHTML='';
+  entSyms.forEach(p=>{const prob=p.freq/entN;const contrib=-prob*log2(prob);const tr=document.createElement('tr');tr.innerHTML='<td>'+p.label+'</td><td>'+p.freq+'</td><td>'+(prob).toFixed(4)+'</td><td>'+(contrib).toFixed(4)+'</td>';tb.appendChild(tr);});
+  document.getElementById('ent-result').textContent=entH.toFixed(4)+' bits/symbol';
+  document.getElementById('ent-compare').textContent='N·H = '+entNH.toFixed(3)+'   |   log₂(n) = '+log2(entSyms.length).toFixed(4);
+  document.getElementById('ent-working-area').style.display='block';
+  const btn=document.getElementById('ent-to-huff');if(btn)btn.style.display='inline-flex';
+}
+function entToggleConcept(){
+  const body=document.getElementById('ent-concept-body');
+  const arrow=document.getElementById('ent-concept-arrow');
+  if(body.style.display==='none'){body.style.display='grid';arrow.textContent='hide';}
+  else{body.style.display='none';arrow.textContent='show';}
+}
+function entropyCalc(raw){
+  // called from exam mode — just load silently and mark done
+  const inp=raw||document.getElementById('ent-input').value.trim();
+  if(!inp)return;
+  entLoadSyms(inp);
+}
+function entropyReset(){
+  entSyms=[];entN=0;entH=0;entNH=0;entNOk=false;entNHOk=false;
+  const tb=document.getElementById('ent-tbody');if(tb)tb.innerHTML='';
+  const btn=document.getElementById('ent-to-huff');if(btn)btn.style.display='none';
+  document.getElementById('ent-explain').textContent='Load a problem to begin.';
+  document.getElementById('ent-qa-area').style.display='none';
+  document.getElementById('ent-working-area').style.display='none';
+  ['ent-fb-n','ent-fb-nh','ent-fb-h'].forEach(id=>setFB(id,'info',''));
+  document.getElementById('ent-row-nh').style.opacity='0.35';
+  document.getElementById('ent-row-h').style.opacity='0.35';
+}
+function entropyToHuffman(){if(!entSyms.length)return;const raw=entSyms.map(p=>p.label+'='+p.freq).join(', ');showPage('huffman');document.getElementById('huff-input').value=raw;huffLoad(raw);}
+
+// ═══════════════════════════════════════════════════ DECODE
+let decTree=null,decCodes={},decBits='',decCurrent='',decOutput='',decOrigOrder=[];
+function decodeLoad(raw){const inp=raw||document.getElementById('dec-syms').value.trim();if(!inp)return;decodeReset();const parsed=parseSyms(inp);if(parsed.length<2){alert('Need ≥2 symbols');return;}decOrigOrder=parsed.map(p=>p.label);let nodes=parsed.map(p=>mkNode(p.label,p.freq,true));while(nodes.length>1){nodes.sort((a,b)=>a.freq-b.freq);const a=nodes.shift(),b=nodes.shift();nodes.push(mkNode('('+a.label+'+'+b.label+')',a.freq+b.freq,false,a,b));}decTree=nodes[0];getCodes(decTree,'',decCodes);renderSVGTree('dec-tree',nodes,n=>n.label+':'+n.freq,COLS.huff);const el=document.getElementById('dec-codes');if(el){el.innerHTML='';decOrigOrder.forEach(sym=>{if(decCodes[sym]===undefined)return;const c=document.createElement('div');c.className='code-card';c.innerHTML='<div class="code-sym">'+sym+'</div><div class="code-bits">'+decCodes[sym]+'</div><div class="code-len">'+decCodes[sym].length+' bit'+(decCodes[sym].length!==1?'s':'')+'</div>';el.appendChild(c);});}const msg=[];const syms=decOrigOrder;for(let i=0;i<8+Math.floor(Math.random()*5);i++)msg.push(pick(syms));decBits=msg.map(s=>decCodes[s]).join('');decCurrent='';decOutput='';renderBitStream();setFB('dec-fb','info','Use Add 0 / Add 1 to walk the tree. Hit Emit when you reach a leaf.');document.getElementById('dec-output').setAttribute('data-expected',msg.join(''));document.getElementById('dec-output').textContent='';document.getElementById('dec-done').style.display='none';addLog('dec-log','info','Message length: '+decBits.length+' bits');}
+function decodeReset(){decTree=null;decCodes={};decBits='';decCurrent='';decOutput='';['dec-tree','dec-codes','dec-log'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML='';});const o=document.getElementById('dec-output');if(o)o.textContent='';const dd=document.getElementById('dec-done');if(dd)dd.style.display='none';setFB('dec-fb','info','Build a tree first.');renderBitStream();}
+function renderBitStream(){const el=document.getElementById('dec-bitstream');if(!el)return;el.innerHTML='';const consumed=decOutput.split('').map(s=>decCodes[s]||'').join('').length;for(let i=0;i<decBits.length;i++){const s=document.createElement('span');s.className='bit '+(i<consumed?'consumed':i<consumed+decCurrent.length?'current':'pending');s.textContent=decBits[i];el.appendChild(s);}}
+function decodeBit(b){if(!decTree){setFB('dec-fb','err','Build a tree first.');return;}decCurrent+=b;renderBitStream();const match=Object.entries(decCodes).find(([s,c])=>c===decCurrent);const partial=Object.entries(decCodes).some(([s,c])=>c.startsWith(decCurrent));const mb=document.getElementById('dec-emit-btn');if(match){setFB('dec-fb','ok','✓ "'+decCurrent+'" matches "'+match[0]+'" — hit Emit!');if(mb)mb.disabled=false;}else if(!partial){setFB('dec-fb','err','✗ "'+decCurrent+'" matches no code — try undoing.');if(mb)mb.disabled=true;}else{setFB('dec-fb','info','"'+decCurrent+'" — keep going...');if(mb)mb.disabled=true;}}
+function decodeEmit(){const match=Object.entries(decCodes).find(([s,c])=>c===decCurrent);if(!match)return;decOutput+=match[0];decCurrent='';const o=document.getElementById('dec-output');if(o)o.textContent=decOutput;addLog('dec-log','ok','✓ Emitted: '+match[0]);renderBitStream();const expected=document.getElementById('dec-output').getAttribute('data-expected');const mb=document.getElementById('dec-emit-btn');if(mb)mb.disabled=true;if(decOutput===expected){setFB('dec-fb','ok','✓ Complete! Decoded: '+decOutput);document.getElementById('dec-done').style.display='block';if(examActive)examTaskDone();}else setFB('dec-fb','info','Good — continue decoding.');}
+function decodeUndo(){if(decCurrent.length>0){decCurrent=decCurrent.slice(0,-1);renderBitStream();setFB('dec-fb','info','Undone. Current: "'+decCurrent+'"');const mb=document.getElementById('dec-emit-btn');if(mb)mb.disabled=true;}}
+
+// ═══════════════════════════════════════════════════ MASTER THEOREM
+let masterQ=null,masterCorrect=0,masterTotal=0,masterLogOk=false,masterCasePicked=0;
+const MASTER_BANK=[
+  {a:4,b:2,fn:'n²',fOrder:2,case:3,sol:'Θ(n²)',logba:2,desc:'T(n) = 4T(n/2) + n²'},
+  {a:2,b:2,fn:'n',fOrder:1,case:2,sol:'Θ(n log n)',logba:1,desc:'T(n) = 2T(n/2) + n'},
+  {a:8,b:2,fn:'n²',fOrder:2,case:1,sol:'Θ(n³)',logba:3,desc:'T(n) = 8T(n/2) + n²'},
+  {a:1,b:2,fn:'1',fOrder:0,case:2,sol:'Θ(log n)',logba:0,desc:'T(n) = T(n/2) + 1'},
+  {a:4,b:4,fn:'n',fOrder:1,case:2,sol:'Θ(n log n)',logba:1,desc:'T(n) = 4T(n/4) + n'},
+  {a:3,b:4,fn:'n log n',fOrder:1,case:3,sol:'Θ(n log n)',logba:0.79,desc:'T(n) = 3T(n/4) + n log n'},
+  {a:2,b:4,fn:'n',fOrder:1,case:3,sol:'Θ(n)',logba:0.5,desc:'T(n) = 2T(n/4) + n'},
+  {a:4,b:2,fn:'n',fOrder:1,case:1,sol:'Θ(n²)',logba:2,desc:'T(n) = 4T(n/2) + n'},
+  {a:2,b:2,fn:'n²',fOrder:2,case:3,sol:'Θ(n²)',logba:1,desc:'T(n) = 2T(n/2) + n²'},
+  {a:9,b:3,fn:'n',fOrder:1,case:1,sol:'Θ(n²)',logba:2,desc:'T(n) = 9T(n/3) + n'},
+];
+function masterNew(){masterQ=pick(MASTER_BANK);masterLogOk=false;masterCasePicked=0;masterTotal++;document.getElementById('master-total').textContent=masterTotal;document.getElementById('master-q').textContent=masterQ.desc+'\n\nGiven: a='+masterQ.a+', b='+masterQ.b+', f(n)='+masterQ.fn;document.getElementById('master-logba').value='';document.getElementById('master-answer').value='';setFB('master-log-fb','info','');setFB('master-case-fb','info','');setFB('master-answer-fb','info','');[1,2,3].forEach(i=>document.getElementById('mcase-'+i).classList.remove('selected'));document.getElementById('master-hint').textContent='Compute log_b(a) = log_'+masterQ.b+'('+masterQ.a+'). Compare order of f(n) to n^log_b(a).';document.getElementById('master-sol-hint').textContent='Select a case first, then state T(n) = ?';}
+function masterReset(){masterQ=null;masterCorrect=0;masterTotal=0;document.getElementById('master-correct').textContent=0;document.getElementById('master-total').textContent=0;document.getElementById('master-q').textContent='Press "New Question" to begin.';}
+function masterCheckLog(){if(!masterQ)return;const val=document.getElementById('master-logba').value.trim();const expected=masterQ.logba;const num=parseFloat(val);const close=Math.abs(num-expected)<0.05;setFB('master-log-fb',close?'ok':'err',close?'✓ Correct! log_'+masterQ.b+'('+masterQ.a+') = '+expected.toFixed(2):'✗ log_'+masterQ.b+'('+masterQ.a+') ≈ '+expected.toFixed(2));masterLogOk=close;}
+function masterPickCase(c){if(!masterQ)return;masterCasePicked=c;[1,2,3].forEach(i=>document.getElementById('mcase-'+i).classList.remove('selected'));document.getElementById('mcase-'+c).classList.add('selected');const hints=['f(n) is polynomially smaller than n^log_b(a) — T(n) is dominated by the recursion tree leaves','f(n) and n^log_b(a) are the same order — multiply by log n','f(n) polynomially dominates n^log_b(a) — T(n) is dominated by the top level work (check regularity!)'];setFB('master-case-fb','info',hints[c-1]);document.getElementById('master-sol-hint').textContent='Case '+c+' solution pattern: '+['Θ(n^log_b(a))','Θ(n^log_b(a) · log n)','Θ(f(n))'][c-1];}
+function masterCheckAnswer(){if(!masterQ)return;const ans=document.getElementById('master-answer').value.trim();const caseOk=masterCasePicked===masterQ.case;const ansOk=complexEq(ans,masterQ.sol)||complexEq(ans,masterQ.sol.replace('Θ','O'));if(caseOk&&ansOk){masterCorrect++;document.getElementById('master-correct').textContent=masterCorrect;setFB('master-answer-fb','ok','✓ Correct! Case '+masterQ.case+', T(n) = '+masterQ.sol);if(examActive)examTaskDone();}else if(!caseOk){setFB('master-answer-fb','err','✗ Wrong case. log_b(a) = '+masterQ.logba.toFixed(2)+', f(n) = n^'+masterQ.fOrder+'. Correct case: '+masterQ.case);}else{setFB('master-answer-fb','err','✗ Right case, wrong answer. T(n) = '+masterQ.sol);}}
+
+// ═══════════════════════════════════════════════════ RECURRENCE
+let recurQ=null,recurCorrect=0,recurTotal=0,recurRecOk=false;
+const RECUR_BANK=[
+  {code:`BinarySearch(A, lo, hi, x):
+  if lo > hi: return -1
+  mid = (lo+hi)/2
+  if A[mid] == x: return mid
+  if A[mid] < x: return BinarySearch(A, mid+1, hi, x)
+  else: return BinarySearch(A, lo, mid-1, x)`,recurrence:'T(n) = T(n/2) + O(1)',complexity:'O(log n)',hint:'Problem halves each call, constant work per level.'},
+  {code:`MergeSort(A, lo, hi):
+  if lo >= hi: return
+  mid = (lo+hi)/2
+  MergeSort(A, lo, mid)    // n/2
+  MergeSort(A, mid+1, hi)  // n/2
+  Merge(A, lo, mid, hi)    // O(n)`,recurrence:'T(n) = 2T(n/2) + O(n)',complexity:'O(n log n)',hint:'Two halves + linear merge. Classic Master Case 2.'},
+  {code:`RecSelSort(A, n, i):
+  if i == n: return
+  // Find min in A[i..n]: O(n)
+  swap A[i] with A[min]
+  RecSelSort(A, n, i+1)   // n-1 elements`,recurrence:'T(n) = T(n-1) + O(n)',complexity:'O(n²)',hint:'Problem reduces by 1 each call. Cannot use Master Theorem — use substitution.'},
+  {code:`Fib(n):
+  if n <= 1: return n
+  return Fib(n-1) + Fib(n-2)`,recurrence:'T(n) = 2T(n-1) + O(1)',complexity:'O(2^n)',hint:'Two recursive calls each reducing by 1. Exponential!'},
+  {code:`Power(x, n):
+  if n == 0: return 1
+  if n is even:
+    half = Power(x, n/2)
+    return half * half
+  else:
+    return x * Power(x, n-1)`,recurrence:'T(n) = T(n/2) + O(1)',complexity:'O(log n)',hint:'Even case: halves the problem. Odd case: n-1 then even. Overall O(log n).'},
+  {code:`Strassen(A, B, n):
+  if n == 1: return A*B
+  // Divide into n/2 × n/2 submatrices
+  // Compute 7 subproblems of size n/2
+  // Combine: O(n²)`,recurrence:'T(n) = 7T(n/2) + O(n²)',complexity:'O(n^2.81)',hint:'7 recursive calls on n/2. log_2(7) ≈ 2.81. Master Case 1.'},
+];
+function recurNew(){recurQ=pick(RECUR_BANK);recurRecOk=false;recurTotal++;document.getElementById('recur-total').textContent=recurTotal;document.getElementById('recur-code').textContent=recurQ.code;document.getElementById('recur-answer').value='';document.getElementById('recur-complexity').value='';setFB('recur-fb','info','Write the recurrence relation for T(n).');setFB('recur-complex-fb','info','After confirming recurrence, solve for T(n).');}
+function recurReset(){recurQ=null;recurCorrect=0;recurTotal=0;document.getElementById('recur-correct').textContent=0;document.getElementById('recur-total').textContent=0;document.getElementById('recur-code').textContent='Press "New Question" to begin.';}
+function recurCheck(){if(!recurQ)return;const ans=document.getElementById('recur-answer').value.trim().replace(/\s/g,'').toLowerCase();const expected=recurQ.recurrence.replace(/\s/g,'').toLowerCase();const ok=ans===expected||ans.replace('o(','θ(')===expected.replace('o(','θ(');if(ok){recurRecOk=true;setFB('recur-fb','ok','✓ Correct! '+recurQ.recurrence);addLog&&addLog('recur-log','ok','✓');}else{setFB('recur-fb','err','✗ Expected: '+recurQ.recurrence+'\nHint: '+recurQ.hint);}}
+function recurCheckComplexity(){if(!recurQ)return;const ans=document.getElementById('recur-complexity').value.trim();const ok=complexEq(ans,recurQ.complexity)||complexEq(ans,recurQ.complexity.replace('Θ','O').replace('θ','O'));if(ok){recurCorrect++;document.getElementById('recur-correct').textContent=recurCorrect;setFB('recur-complex-fb','ok','✓ Correct! T(n) = '+recurQ.complexity);if(examActive)examTaskDone();}else{setFB('recur-complex-fb','err','✗ Expected: '+recurQ.complexity+'. Hint: '+recurQ.hint);}}
+
+// ═══════════════════════════════════════════════════ RABIN-KARP
+let rkData=null,rkStep=0,rkSteps=[];
+function rkLoad(){const T=document.getElementById('rk-text').value.trim();const P=document.getElementById('rk-pattern').value.trim();const d=parseInt(document.getElementById('rk-d').value);const q=parseInt(document.getElementById('rk-q').value);if(!T||!P||isNaN(d)||isNaN(q)){setFB('rk-fb','err','Fill in all fields.');return;}rkReset();const n=T.length,m=P.length;if(m>n){setFB('rk-fb','err','Pattern longer than text.');return;}// Convert to numeric if digit-only, else use char codes
+const isDigit=/^\d+$/.test(T+P);const tArr=isDigit?T.split('').map(Number):T.split('').map(c=>c.charCodeAt(0));const pArr=isDigit?P.split('').map(Number):P.split('').map(c=>c.charCodeAt(0));// Compute h = d^(m-1) mod q
+let h=1;for(let i=0;i<m-1;i++)h=(h*d)%q;// Compute p
+let p=0;for(let i=0;i<m;i++)p=(p*d+pArr[i])%q;// Compute t0
+let t0=0;for(let i=0;i<m;i++)t0=(t0*d+tArr[i])%q;// Generate ts values
+const tVals=[t0];for(let s=0;s<n-m;s++){let ts=tVals[s];let next=(d*(ts-tArr[s]*h)+tArr[s+m])%q;if(next<0)next+=q;tVals.push(next);}const validShifts=[];for(let s=0;s<=n-m;s++){if(tVals[s]===p){// Verify
+const window=T.substring(s,s+m);if(window===P)validShifts.push(s);}}rkData={T,P,d,q,n,m,h,p,t0,tArr,pArr,tVals,validShifts,isDigit};renderRkSteps();}
+function rkReset(){rkData=null;rkStep=0;rkSteps=[];document.getElementById('rk-steps').textContent='Load a text and pattern to begin.';document.getElementById('rk-results').innerHTML='';document.getElementById('rk-log').innerHTML='';setFB('rk-fb','info','—');}
+function renderRkSteps(){if(!rkData)return;const{T,P,d,q,n,m,h,p,t0,tVals}=rkData;const cont=document.getElementById('rk-steps');cont.innerHTML='';const addStep=(label,formula,val,id)=>{const div=document.createElement('div');div.className='rk-step';div.innerHTML='<div class="rk-label">'+label+'</div><div>'+formula+' = <span class="rk-val" id="'+id+'">???</span></div>';cont.appendChild(div);};addStep('Step 1: compute h','d^(m-1) mod q = '+d+'^'+(m-1)+' mod '+q,'','rk-h');addStep('Step 2: compute p (pattern hash)','Horner\'s rule on "'+P+'" mod '+q,'','rk-p');addStep('Step 3: compute t₀ (first window hash)','Horner\'s rule on T[1..'+m+'] = "'+T.substring(0,m)+'" mod '+q,'','rk-t0');for(let s=1;s<=n-m;s++){addStep('Step '+(s+3)+': compute t'+s,'= ('+d+'(t'+(s-1)+' − T['+(s-1+1)+']·h) + T['+(s+m-1+1)+']) mod '+q,'','rk-t'+s);}// Now ask user to fill each
+setFB('rk-fb','info','Enter value for h = d^(m-1) mod q:');rkStep=0;document.getElementById('rk-input-area').innerHTML='<div class="fb info" id="rk-fb">Enter value for h = d^(m-1) mod q:</div><div class="row"><input type="number" id="rk-val-input" style="width:100px;" placeholder="0"><button class="btn btn-primary" onclick="rkSubmit()">Submit</button></div>';}
+function rkSubmit(){if(!rkData)return;const{h,p,t0,tVals,d,q,n,m}=rkData;const val=parseInt(document.getElementById('rk-val-input').value);if(isNaN(val)){setFB('rk-fb','err','Enter a number.');return;}const steps=[h,p,t0,...tVals.slice(1)];const labels=['h','p','t₀',...tVals.slice(1).map((_,i)=>'t'+(i+1))];const ids=['rk-h','rk-p','rk-t0',...tVals.slice(1).map((_,i)=>'rk-t'+(i+1))];const expected=steps[rkStep];if(val===expected){const el=document.getElementById(ids[rkStep]);if(el){el.textContent=val;el.style.color='var(--green)';}addLog('rk-log','ok','✓ '+labels[rkStep]+' = '+val);rkStep++;if(rkStep>=steps.length){setFB('rk-fb','ok','✓ All values correct!');document.getElementById('rk-input-area').innerHTML='<div class="fb ok">✓ Complete! See results panel.</div>';renderRkResults();if(examActive)examTaskDone();}else{setFB('rk-fb','info','Enter '+labels[rkStep]+' =');document.getElementById('rk-val-input').value='';}}else{setFB('rk-fb','err','✗ Expected '+labels[rkStep]+' = '+expected+'. Got '+val+'.');addLog('rk-log','err','✗ '+labels[rkStep]+' expected '+expected);}}
+function renderRkResults(){if(!rkData)return;const{validShifts,tVals,p,T,P}=rkData;const el=document.getElementById('rk-results');el.innerHTML='';const line=(label,val,col)=>{const d=document.createElement('div');d.style.cssText='font-family:var(--mono);font-size:.82rem;margin-bottom:6px;';d.innerHTML='<span style="color:var(--text3);">'+label+': </span><span style="color:'+(col||'var(--teal)')+'">'+val+'</span>';el.appendChild(d);};line('Pattern hash p',rkData.p);line('Window hashes',tVals.join(', '));line('Matches (tₛ = p)',tVals.map((t,i)=>t===p?'s='+i:'').filter(Boolean).join(', ')||'none');line('Valid shifts',validShifts.length?validShifts.join(', '):'no matches','var(--green)');}
+
+// ═══════════════════════════════════════════════════ KNAPSACK DP
+let ksData=null,ksTable=null,ksFilled=null,ksSelectedCell=null;
+const KS_PROBLEMS=[
+  {n:4,C:6,w:[2,3,4,2],p:[3,4,5,2],label:'n=4, C=6'},
+  {n:5,C:10,w:[2,2,6,5,4],p:[6,3,5,4,6],label:'n=5, C=10'},
+  {n:3,C:5,w:[2,3,4],p:[3,4,5],label:'n=3, C=5'},
+  {n:4,C:8,w:[1,3,4,5],p:[1,4,5,7],label:'n=4, C=8'},
+];
+function computeKsTable(n,C,w,p){// P[i][k] — 1-indexed items, 0-indexed capacity
+  const P=[];for(let i=0;i<=n+1;i++){P.push([]);for(let k=0;k<=C;k++)P[i].push(0);}// Fill bottom up
+  for(let i=n;i>=1;i--){for(let k=0;k<=C;k++){if(w[i-1]>k)P[i][k]=P[i+1][k];else P[i][k]=Math.max(P[i+1][k],p[i-1]+P[i+1][k-w[i-1]]);}}return P;}
+function ksNew(){const prob=pick(KS_PROBLEMS);ksData=prob;const{n,C,w,p}=prob;ksTable=computeKsTable(n,C,w,p);ksFilled=[];for(let i=0;i<=n+1;i++){ksFilled.push([]);for(let k=0;k<=C;k++)ksFilled[i].push(i===n+1?true:false);}// n+1 row is all 0 — pre-filled
+ksSelectedCell=null;document.getElementById('ks-done').style.display='none';document.getElementById('ks-traceback').style.display='none';document.getElementById('ks-log').innerHTML='';setFB('ks-fb','info','Fill from row '+n+' up to row 1.');document.getElementById('ks-current-cell').textContent='—';// Show problem
+document.getElementById('ks-problem').innerHTML='Items (1-indexed):<br>'+w.map((wi,i)=>'  Item '+(i+1)+': w='+wi+', p='+p[i]).join('<br>')+'<br>Capacity C = '+C+'<br><span style="color:var(--text3);font-size:.78rem;">Recurrence: P(i,k) = P(i+1,k) if wᵢ>k, else max(P(i+1,k), pᵢ+P(i+1,k−wᵢ))<br>Base case: P(n+1,k) = 0 for all k</span>';renderKsTable();}
+function ksReset(){ksData=null;ksTable=null;ksFilled=null;ksSelectedCell=null;document.getElementById('ks-table-wrap').innerHTML='—';document.getElementById('ks-problem').textContent='Press "New Problem" to begin.';document.getElementById('ks-done').style.display='none';document.getElementById('ks-traceback').style.display='none';document.getElementById('ks-log').innerHTML='';setFB('ks-fb','info','—');}
+function renderKsTable(){if(!ksData)return;const{n,C}=ksData;const wrap=document.getElementById('ks-table-wrap');wrap.innerHTML='';const table=document.createElement('table');table.className='dp-table';// Header
+const hdr=document.createElement('tr');hdr.innerHTML='<th>i \\ k</th>';for(let k=0;k<=C;k++)hdr.innerHTML+='<th>'+k+'</th>';table.appendChild(hdr);// Rows n+1 down to 1
+for(let i=n+1;i>=1;i--){const tr=document.createElement('tr');tr.innerHTML='<td class="header-row">'+i+(i===n+1?' (base)':'')+'</td>';for(let k=0;k<=C;k++){const td=document.createElement('td');const filled=ksFilled[i][k];if(filled){td.className='filled';td.textContent=ksTable[i][k];}else{td.textContent='?';td.className='';if(ksSelectedCell&&ksSelectedCell[0]===i&&ksSelectedCell[1]===k)td.className='current';td.onclick=()=>ksSelectCell(i,k);}tr.appendChild(td);}table.appendChild(tr);}wrap.appendChild(table);}
+function ksSelectCell(i,k){if(!ksData)return;if(ksFilled[i][k])return;ksSelectedCell=[i,k];document.getElementById('ks-current-cell').textContent='P['+i+','+k+'] =';document.getElementById('ks-cell-val').value='';document.getElementById('ks-cell-val').focus();renderKsTable();}
+function ksFillCell(){if(!ksData||!ksSelectedCell)return;const[i,k]=ksSelectedCell;const val=parseInt(document.getElementById('ks-cell-val').value);if(isNaN(val)){setFB('ks-fb','err','Enter a number.');return;}const expected=ksTable[i][k];if(val===expected){ksFilled[i][k]=true;const{w,p}=ksData;const reason=w[i-1]>k?'wᵢ='+w[i-1]+'>k='+k+' → copy P['+(i+1)+','+k+']='+ksTable[i+1][k]:'max(P['+(i+1)+','+k+']='+ksTable[i+1][k]+', '+p[i-1]+'+P['+(i+1)+','+(k-w[i-1])+']='+ksTable[i+1][k-w[i-1]]+')='+expected;setFB('ks-fb','ok','✓ P['+i+','+k+'] = '+expected+'  ('+reason+')');addLog('ks-log','ok','✓ P['+i+','+k+']='+expected);ksSelectedCell=null;renderKsTable();// Check done
+let done=true;for(let ii=1;ii<=ksData.n;ii++)for(let kk=0;kk<=ksData.C;kk++)if(!ksFilled[ii][kk]){done=false;break;}if(done){document.getElementById('ks-done').style.display='block';document.getElementById('ks-traceback').style.display='block';document.getElementById('ks-items').textContent=traceKs();if(examActive)examTaskDone();}}else{setFB('ks-fb','err','✗ Expected P['+i+','+k+'] = '+expected+'. Got '+val+'.');addLog('ks-log','err','✗ P['+i+','+k+'] wrong');}}
+function traceKs(){if(!ksData)return'';const{n,C,w,p}=ksData;const items=[];let k=C;for(let i=1;i<=n;i++){if(ksTable[i][k]!==ksTable[i+1][k]){items.push(i);k-=w[i-1];}}return'Selected items: '+items.join(', ')+' → profit='+ksTable[1][C];}
+
+// ═══════════════════════════════════════════════════ LCS
+let lcsData=null,lcsTable=null,lcsFilled=null,lcsSelectedCell=null;
+const LCS_PROBLEMS=[
+  {X:'ABCBDAB',Y:'BDCABA'},
+  {X:'AGGTAB',Y:'GXTXAYB'},
+  {X:'ABCD',Y:'ACBD'},
+  {X:'XMJYAUZ',Y:'MZJAWXU'},
+  {X:'ABC',Y:'AC'},
+  {X:'ABCBA',Y:'ABCBCBA'},
+];
+function computeLcsTable(X,Y){const m=X.length,n=Y.length;const c=[];for(let i=0;i<=m;i++){c.push([]);for(let j=0;j<=n;j++){if(i===0||j===0)c[i].push(0);else if(X[i-1]===Y[j-1])c[i].push(c[i-1][j-1]+1);else c[i].push(Math.max(c[i-1][j],c[i][j-1]));}}return c;}
+function lcsNew(){const prob=pick(LCS_PROBLEMS);lcsData=prob;const{X,Y}=prob;lcsTable=computeLcsTable(X,Y);const m=X.length,n=Y.length;lcsFilled=[];for(let i=0;i<=m;i++){lcsFilled.push([]);for(let j=0;j<=n;j++)lcsFilled[i].push(i===0||j===0);}lcsSelectedCell=null;document.getElementById('lcs-done').style.display='none';document.getElementById('lcs-result').style.display='none';document.getElementById('lcs-log').innerHTML='';setFB('lcs-fb','info','Fill row by row, left to right. Row 0 and Col 0 are pre-filled.');document.getElementById('lcs-current-cell').textContent='—';document.getElementById('lcs-problem').innerHTML='X = '+X+'<br>Y = '+Y+'<br><span style="color:var(--text3);font-size:.78rem;">c[i,j] length of LCS of X[1..i] and Y[1..j]</span>';renderLcsTable();}
+function lcsReset(){lcsData=null;lcsTable=null;lcsFilled=null;lcsSelectedCell=null;document.getElementById('lcs-table-wrap').innerHTML='—';document.getElementById('lcs-problem').textContent='Press "New Problem" to begin.';document.getElementById('lcs-done').style.display='none';document.getElementById('lcs-result').style.display='none';document.getElementById('lcs-log').innerHTML='';setFB('lcs-fb','info','—');}
+function renderLcsTable(){if(!lcsData)return;const{X,Y}=lcsData;const m=X.length,n=Y.length;const wrap=document.getElementById('lcs-table-wrap');wrap.innerHTML='';const table=document.createElement('table');table.className='dp-table';const hdr=document.createElement('tr');hdr.innerHTML='<th></th><th>ε</th>';for(let j=0;j<n;j++)hdr.innerHTML+='<th>'+Y[j]+'</th>';table.appendChild(hdr);for(let i=0;i<=m;i++){const tr=document.createElement('tr');tr.innerHTML='<th>'+(i===0?'ε':X[i-1])+'</th>';for(let j=0;j<=n;j++){const td=document.createElement('td');if(lcsFilled[i][j]){td.className='filled';td.textContent=lcsTable[i][j];}else{td.textContent='?';td.className='';if(lcsSelectedCell&&lcsSelectedCell[0]===i&&lcsSelectedCell[1]===j)td.className='current';td.onclick=()=>lcsSelectCell(i,j);}tr.appendChild(td);}table.appendChild(tr);}wrap.appendChild(table);}
+function lcsSelectCell(i,j){if(!lcsData)return;if(lcsFilled[i][j])return;lcsSelectedCell=[i,j];document.getElementById('lcs-current-cell').textContent='c['+i+','+j+'] =';document.getElementById('lcs-cell-val').value='';document.getElementById('lcs-cell-val').focus();renderLcsTable();}
+function lcsFillCell(){if(!lcsData||!lcsSelectedCell)return;const[i,j]=lcsSelectedCell;const val=parseInt(document.getElementById('lcs-cell-val').value);if(isNaN(val)){setFB('lcs-fb','err','Enter a number.');return;}const expected=lcsTable[i][j];if(val===expected){lcsFilled[i][j]=true;const{X,Y}=lcsData;const reason=X[i-1]===Y[j-1]?'X['+i+']=Y['+j+']="'+X[i-1]+'" → c['+(i-1)+','+(j-1)+']+1':'max(c['+(i-1)+','+j+']='+lcsTable[i-1][j]+', c['+i+','+(j-1)+']='+lcsTable[i][j-1]+')';setFB('lcs-fb','ok','✓ c['+i+','+j+'] = '+expected+'  ('+reason+')');addLog('lcs-log','ok','✓ c['+i+','+j+']='+expected);lcsSelectedCell=null;renderLcsTable();let done=true;for(let ii=1;ii<=X.length;ii++)for(let jj=1;jj<=Y.length;jj++)if(!lcsFilled[ii][jj]){done=false;break;}if(done){document.getElementById('lcs-done').style.display='block';const lcsLen=lcsTable[X.length][Y.length];document.getElementById('lcs-result').style.display='block';document.getElementById('lcs-result').textContent='LCS length = '+lcsLen;if(examActive)examTaskDone();}}else{setFB('lcs-fb','err','✗ Expected c['+i+','+j+'] = '+expected+'. Got '+val+'.');addLog('lcs-log','err','✗ c['+i+','+j+'] wrong');}}
+
+// ═══════════════════════════════════════════════════ MATRIX CHAIN
+let mcData=null,mcTable=null,mcFilled=null,mcSelectedCell=null;
+const MC_PROBLEMS=[
+  {n:4,p:[10,20,50,1,100],label:'A1:10×20, A2:20×50, A3:50×1, A4:1×100'},
+  {n:3,p:[5,10,3,12],label:'A1:5×10, A2:10×3, A3:3×12'},
+  {n:4,p:[3,5,2,4,1],label:'A1:3×5, A2:5×2, A3:2×4, A4:4×1'},
+  {n:3,p:[10,30,5,60],label:'A1:10×30, A2:30×5, A3:5×60'},
+  {n:5,p:[2,3,4,2,3,1],label:'A1:2×3, A2:3×4, A3:4×2, A4:2×3, A5:3×1'},
+];
+function computeMcTable(n,p){const m=[];for(let i=0;i<=n;i++){m.push([]);for(let j=0;j<=n;j++)m[i].push(i===j?0:Infinity);}for(let l=2;l<=n;l++){for(let i=1;i<=n-l+1;i++){const j=i+l-1;for(let k=i;k<j;k++){const q=m[i][k]+m[k+1][j]+p[i-1]*p[k]*p[j];if(q<m[i][j])m[i][j]=q;}}}return m;}
+function mcNew(){const prob=pick(MC_PROBLEMS);mcData=prob;const{n,p}=prob;mcTable=computeMcTable(n,p);mcFilled=[];for(let i=0;i<=n;i++){mcFilled.push([]);for(let j=0;j<=n;j++)mcFilled[i].push(i===j||i===0||j===0||i>j);}mcSelectedCell=null;document.getElementById('mc-done').style.display='none';document.getElementById('mc-result').style.display='none';document.getElementById('mc-log').innerHTML='';setFB('mc-fb','info','Fill diagonal by diagonal. Diagonal d=1 means m[i,i]=0 (pre-filled). Start with d=2.');document.getElementById('mc-current-cell').textContent='—';document.getElementById('mc-problem').innerHTML=prob.label+'<br>Dimensions: p = ['+p.join(', ')+']<br><span style="color:var(--text3);font-size:.78rem;">m[i,j] = min_{i≤k&lt;j} (m[i,k]+m[k+1,j]+p[i-1]·p[k]·p[j])</span>';renderMcTable();}
+function mcReset(){mcData=null;mcTable=null;mcFilled=null;mcSelectedCell=null;document.getElementById('mc-table-wrap').innerHTML='—';document.getElementById('mc-problem').textContent='Press "New Problem" to begin.';document.getElementById('mc-done').style.display='none';document.getElementById('mc-result').style.display='none';document.getElementById('mc-log').innerHTML='';setFB('mc-fb','info','—');}
+function renderMcTable(){if(!mcData)return;const{n}=mcData;const wrap=document.getElementById('mc-table-wrap');wrap.innerHTML='';const table=document.createElement('table');table.className='dp-table';const hdr=document.createElement('tr');hdr.innerHTML='<th>m[i,j]</th>';for(let j=1;j<=n;j++)hdr.innerHTML+='<th>'+j+'</th>';table.appendChild(hdr);for(let i=1;i<=n;i++){const tr=document.createElement('tr');tr.innerHTML='<th>'+i+'</th>';for(let j=1;j<=n;j++){const td=document.createElement('td');if(i>j){td.textContent='—';td.style.color='var(--text3)';td.style.cursor='default';}else if(mcFilled[i][j]){td.className='filled';td.textContent=mcTable[i][j]===Infinity?'∞':mcTable[i][j];}else{td.textContent='?';if(mcSelectedCell&&mcSelectedCell[0]===i&&mcSelectedCell[1]===j)td.className='current';td.onclick=()=>mcSelectCell(i,j);}tr.appendChild(td);}table.appendChild(tr);}wrap.appendChild(table);}
+function mcSelectCell(i,j){if(!mcData)return;if(mcFilled[i][j])return;mcSelectedCell=[i,j];document.getElementById('mc-current-cell').textContent='m['+i+','+j+'] =';document.getElementById('mc-cell-val').value='';document.getElementById('mc-cell-val').focus();renderMcTable();}
+function mcFillCell(){if(!mcData||!mcSelectedCell)return;const[i,j]=mcSelectedCell;const val=parseInt(document.getElementById('mc-cell-val').value);if(isNaN(val)){setFB('mc-fb','err','Enter a number.');return;}const expected=mcTable[i][j];if(val===expected){mcFilled[i][j]=true;setFB('mc-fb','ok','✓ m['+i+','+j+'] = '+expected);addLog('mc-log','ok','✓ m['+i+','+j+']='+expected);mcSelectedCell=null;renderMcTable();let done=true;for(let ii=1;ii<=mcData.n;ii++)for(let jj=ii+1;jj<=mcData.n;jj++)if(!mcFilled[ii][jj]){done=false;break;}if(done){document.getElementById('mc-done').style.display='block';document.getElementById('mc-result').style.display='block';document.getElementById('mc-result').textContent='Optimal multiplications = m[1,'+mcData.n+'] = '+mcTable[1][mcData.n];if(examActive)examTaskDone();}}else{setFB('mc-fb','err','✗ Expected m['+i+','+j+'] = '+expected+'. Got '+val+'.');addLog('mc-log','err','✗ m['+i+','+j+'] wrong');}}
+
+// ═══════════════════════════════════════════════════ PARALLEL ANALYSIS
+let parQ=null,parCorrect=0,parTotal=0,parOptChoice=null,parEffChoice=null;
+const PAR_BANK=[
+  {desc:'A parallel algorithm computes the SUM of n integers using n processors in T(n) = Θ(log n) time.',T:'Θ(log n)',P:'O(n)',C:'Θ(n log n)',Tstar:'Θ(n)',S:'n/log n',E:'1/log n',opt:false,eff:true,model:'EREW'},
+  {desc:'A parallel algorithm SORTS n elements using n² processors in T(n) = O(1) time.\n(CRCW with reduce-to-sum)',T:'O(1)',P:'O(n²)',C:'O(n²)',Tstar:'O(n log n)',S:'n log n',E:'log n / n',opt:false,eff:false,model:'CRCW'},
+  {desc:'A parallel algorithm SEARCHES an unsorted array of n elements.\nUsing CRCW model with n processors.',T:'O(1)',P:'O(n)',C:'O(n)',Tstar:'O(n)',S:'n',E:'1',opt:true,eff:true,model:'CRCW'},
+  {desc:'A parallel BROADCAST operation puts x into B[1..n] using n processors in T(n) = O(log n) steps.\n(EREW model)',T:'O(log n)',P:'O(n)',C:'O(n log n)',Tstar:'O(n)',S:'n/log n',E:'1/log n',opt:false,eff:true,model:'EREW'},
+  {desc:'A parallel algorithm finds the PREFIX SUM of a linked list with n items.\nUses pointer jumping with n processors.',T:'O(log n)',P:'O(n)',C:'O(n log n)',Tstar:'O(n)',S:'n/log n',E:'1/log n',opt:false,eff:true,model:'EREW'},
+];
+function parNew(){parQ=pick(PAR_BANK);parOptChoice=null;parEffChoice=null;parTotal++;document.getElementById('par-total').textContent=parTotal;document.getElementById('par-q').textContent=parQ.desc;['par-tn','par-pn','par-cn','par-tstar','par-sn','par-en'].forEach(id=>document.getElementById(id).value='');setFB('par-fb','info','Fill in all fields and submit.');['par-yes','par-no','par-eff-yes','par-eff-no'].forEach(id=>{const b=document.getElementById(id);if(b){b.style.borderColor='';b.style.background='';}});document.getElementById('par-results').textContent='Submit to see results.';}
+function parReset(){parQ=null;parCorrect=0;parTotal=0;document.getElementById('par-correct').textContent=0;document.getElementById('par-total').textContent=0;document.getElementById('par-q').textContent='Press "New Problem" to begin.';}
+function parSetOpt(v){parOptChoice=v;['par-yes','par-no'].forEach(id=>{const b=document.getElementById(id);if(b){b.style.borderColor='var(--border2)';b.style.background='';}});const chosen=v?document.getElementById('par-yes'):document.getElementById('par-no');if(chosen){chosen.style.borderColor='var(--amber)';chosen.style.background='var(--amber-dim)';}}
+function parSetEff(v){parEffChoice=v;['par-eff-yes','par-eff-no'].forEach(id=>{const b=document.getElementById(id);if(b){b.style.borderColor='var(--border2)';b.style.background='';}});const chosen=v?document.getElementById('par-eff-yes'):document.getElementById('par-eff-no');if(chosen){chosen.style.borderColor='var(--amber)';chosen.style.background='var(--amber-dim)';}}
+function parCheck(){if(!parQ)return;const fields=[{id:'par-tn',key:'T',label:'T(n)'},{id:'par-pn',key:'P',label:'P(n)'},{id:'par-cn',key:'C',label:'C(n)'},{id:'par-tstar',key:'Tstar',label:'T*(n)'},{id:'par-sn',key:'S',label:'S(n)'},{id:'par-en',key:'E',label:'E(n)'}];const keys={T:'T',P:'P',C:'C',Tstar:'Tstar',S:'S',E:'E'};const expected={T:parQ.T,P:parQ.P,C:parQ.C,Tstar:parQ.Tstar,S:parQ.S,E:parQ.E};let allCorrect=true;let res='';fields.forEach(f=>{const ans=document.getElementById(f.id).value.trim();const exp=expected[f.key];const ok=complexEq(ans,exp)||ans.toLowerCase().replace(/\s/g,'')===exp.toLowerCase().replace(/\s/g,'');if(!ok)allCorrect=false;res+='<div style="margin-bottom:4px;"><span style="color:var(--text3);">'+f.label+': </span><span style="color:'+(ok?'var(--green)':'var(--red)')+'">'+ans+(ok?'':' ✗ ('+exp+')')+'</span></div>';});const optOk=parOptChoice===parQ.opt;const effOk=parEffChoice===parQ.eff;if(!optOk)allCorrect=false;if(!effOk)allCorrect=false;res+='<div style="margin-bottom:4px;"><span style="color:var(--text3);">Cost optimal: </span><span style="color:'+(optOk?'var(--green)':'var(--red)')+'">'+String(parOptChoice)+(optOk?'':' ✗ ('+String(parQ.opt)+')')+'</span></div>';res+='<div style="margin-bottom:4px;"><span style="color:var(--text3);">Cost efficient: </span><span style="color:'+(effOk?'var(--green)':'var(--red)')+'">'+String(parEffChoice)+(effOk?'':' ✗ ('+String(parQ.eff)+')')+'</span></div>';document.getElementById('par-results').innerHTML=res;if(allCorrect){parCorrect++;document.getElementById('par-correct').textContent=parCorrect;setFB('par-fb','ok','✓ All correct!');if(examActive)examTaskDone();}else{setFB('par-fb','err','✗ Some answers wrong — see results panel.');}}
+
+// ═══════════════════════════════════════════════════ QUIZ
+let quizCorrect=0,quizTotal=0,quizAnswered=false;
+const QUIZ_BANK=[
+  ()=>{const syms=[{l:'A',f:5},{l:'B',f:2},{l:'C',f:8},{l:'D',f:1},{l:'E',f:3}];shuffle(syms);const sorted=[...syms].sort((a,b)=>a.f-b.f);const corrA=sorted[0],corrB=sorted[1];const wrong1=syms.filter(s=>s.l!==corrA.l&&s.l!==corrB.l).slice(0,2);const opts=[corrA.l+'+'+corrB.l+'='+(corrA.f+corrB.f),wrong1[0].l+'+'+corrB.l+'='+(wrong1[0].f+corrB.f),corrA.l+'+'+wrong1[1].l+'='+(corrA.f+wrong1[1].f),wrong1[0].l+'+'+wrong1[1].l+'='+(wrong1[0].f+wrong1[1].f)];return{topic:'Huffman',q:'Symbols: '+syms.map(s=>s.l+'='+s.f).join(', ')+'\n\nWhich pair to merge first?',opts,correct:0};},
+  ()=>({topic:'Master Theorem',q:'T(n) = 4T(n/2) + n²\n\nWhich Master Theorem case applies?',opts:['Case 1 — recursion dominates','Case 2 — equal order','Case 3 — f(n) dominates','No Master Theorem applicable'],correct:2}),
+  ()=>({topic:'Master Theorem',q:'T(n) = 2T(n/2) + n\n\nT(n) = ?',opts:['Θ(n)','Θ(n log n)','Θ(n²)','Θ(log n)'],correct:1}),
+  ()=>({topic:'Entropy',q:'Shannon entropy H gives you:',opts:['Exact bits Huffman will use','Theoretical minimum average bits per symbol','Bits used by ASCII','Number of symbols'],correct:1}),
+  ()=>({topic:'Huffman',q:'Why must Huffman codes be prefix-free?',opts:['To minimise code length','To allow decoding without separators','To balance the tree','For alphabetical ordering'],correct:1}),
+  ()=>({topic:'Gzip',q:'In Gzip, what does the pair (0, 65) mean?',opts:['Go back 0, copy 65 chars','New character with ASCII code 65','An error','Copy 65 chars from start'],correct:1}),
+  ()=>({topic:'Hu-Tucker',q:'Key difference between Huffman and Hu-Tucker:',opts:['Huffman is DP, HT is greedy','HT gives alphabetically ordered codewords','Huffman has three phases','HT is suboptimal'],correct:1}),
+  ()=>({topic:'Dynamic Programming',q:'0/1 Knapsack DP fills a table P[i,k]. What is the base case?',opts:['P[1,k] = p₁ for all k','P[n+1,k] = 0 for all k','P[i,0] = pᵢ','P[0,0] = 0 only'],correct:1}),
+  ()=>({topic:'Dynamic Programming',q:'In LCS, if X[i] = Y[j], then c[i,j] = ?',opts:['max(c[i-1,j], c[i,j-1])','c[i-1,j-1] + 1','c[i-1,j-1]','c[i,j-1] + 1'],correct:1}),
+  ()=>({topic:'Dynamic Programming',q:'Matrix chain m[i,j] is filled in what order?',opts:['Row by row left to right','Diagonal by diagonal, shortest chains first','Column by column','Randomly'],correct:1}),
+  ()=>({topic:'Parallel',q:'A parallel algorithm is cost optimal when:',opts:['S(n) = P(n)','E(n) = 1 i.e. C(n) = T*(n)','T(n) = O(1)','P(n) is minimised'],correct:1}),
+  ()=>({topic:'Parallel',q:'EREW vs CRCW — which is more restrictive?',opts:['CRCW — multiple writes are hard','EREW — no concurrent reads or writes','They are equivalent','CREW — concurrent reads only'],correct:1}),
+  ()=>({topic:'String Matching',q:'Rabin-Karp worst case time complexity is:',opts:['O(n+m)','O(nm)','O(n)','O(m log n)'],correct:1}),
+  ()=>({topic:'String Matching',q:'In Rabin-Karp, what is a "spurious hit"?',opts:['A match where tₛ = p but T[s+1..s+m] ≠ P','Any case where the pattern is found','When hash values overflow','When q is not prime'],correct:0}),
+  ()=>({topic:'Recurrence',q:'T(n) = T(n/2) + 1 solves to:',opts:['O(n)','O(n log n)','O(log n)','O(1)'],correct:2}),
+  ()=>({topic:'HT Phase 3',q:'In Hu-Tucker Phase 3, process which depth first?',opts:['Shallowest (closest to root)','Deepest level first','Any depth in any order','Only depth 1 nodes'],correct:1}),
+];
+function quizNext(){quizAnswered=false;const qFn=pick(QUIZ_BANK);const q=qFn();quizTotal++;document.getElementById('quiz-total').textContent=quizTotal;document.getElementById('quiz-topic-label').textContent=q.topic;document.getElementById('quiz-q').textContent=q.q;const optsEl=document.getElementById('quiz-opts');optsEl.innerHTML='';const fb=document.getElementById('quiz-fb');fb.style.display='none';document.getElementById('quiz-next-btn').style.display='none';const shuffledOpts=[...q.opts.map((o,i)=>({o,i}))];shuffle(shuffledOpts);shuffledOpts.forEach(({o,i})=>{const btn=document.createElement('button');btn.className='mc-opt';btn.textContent=o;btn.onclick=()=>{if(quizAnswered)return;quizAnswered=true;const correct=i===q.correct;btn.classList.add(correct?'correct':'wrong');optsEl.querySelectorAll('.mc-opt').forEach(b=>{b.disabled=true;const origIdx=shuffledOpts.find(s=>s.o===b.textContent)?.i;if(origIdx===q.correct&&b!==btn)b.classList.add('correct');});if(correct){quizCorrect++;document.getElementById('quiz-correct').textContent=quizCorrect;setFBEl(fb,'ok','✓ Correct!');}else{setFBEl(fb,'err','✗ Wrong. Correct: '+q.opts[q.correct]);}fb.style.display='flex';document.getElementById('quiz-next-btn').style.display='block';};optsEl.appendChild(btn);});}
+function quizReset(){quizCorrect=0;quizTotal=0;document.getElementById('quiz-correct').textContent=0;document.getElementById('quiz-total').textContent=0;}
+
+// ═══════════════════════════════════════════════════ EXAM MODE
+let examActive=false,examQNum=0,examScore=0,examTotal=0,examSelectedTopics=new Set(),examTaskComplete=false;
+const EXAM_TOPICS=[
+  {id:'huffman',name:'Huffman Coding',desc:'Build the tree, read off codes'},
+  {id:'hutcker',name:'Hu-Tucker',desc:'All three phases'},
+  {id:'gzip',name:'Gzip Encoding',desc:'Produce the symbol stream'},
+  {id:'entropy',name:'Entropy',desc:'Calculate H'},
+  {id:'decode',name:'Huffman Decode',desc:'Decode a bitstring'},
+  {id:'master',name:'Master Theorem',desc:'Identify case + solve T(n)'},
+  {id:'recurrence',name:'Recurrence Writing',desc:'Write T(n) for given code'},
+  {id:'rabinkarp',name:'Rabin-Karp',desc:'Compute hash values step-by-step'},
+  {id:'knapsack',name:'Knapsack DP',desc:'Fill the P[i,k] table'},
+  {id:'lcs',name:'LCS Table',desc:'Fill the c[i,j] table'},
+  {id:'matchain',name:'Matrix Chain',desc:'Fill the m[i,j] table'},
+  {id:'parallel',name:'PRAM Analysis',desc:'Compute T, P, C, S, E'},
+  {id:'quiz',name:'Concept Quiz',desc:'Multiple choice'},
+];
+const EXAM_INPUTS_HUFFMAN=['A=14, B=2, C=7, D=3, E=11, F=1, G=5','A=10, B=3, C=7, D=1, E=5','A=6, B=4, C=2, D=8, E=1, F=3','A=15, B=4, C=1, D=8, E=3'];
+const EXAM_INPUTS_HT=['A=3, B=1, C=7, D=2, E=5, F=8, G=1, H=4','A=1, B=6, C=8, D=1, E=6, F=2','A=2, B=7, C=1, D=4, E=9'];
+const EXAM_INPUTS_GZIP=['ABRACADABRA','MISSISSIPPI','AABBAABBCC','BANANA'];
+const EXAM_INPUTS_ENT=['A=5, B=2, C=1, D=1, E=2','A=8, B=4, C=2, D=2','A=4, B=4, C=4, D=4'];
+function buildExamTopicGrid(){const grid=document.getElementById('exam-topic-grid');grid.innerHTML='';EXAM_TOPICS.forEach(t=>{const card=document.createElement('div');card.className='topic-card'+(examSelectedTopics.has(t.id)?' selected':'');card.innerHTML='<div class="tc-name">'+t.name+'</div><div class="tc-desc">'+t.desc+'</div>';card.onclick=()=>{if(examSelectedTopics.has(t.id))examSelectedTopics.delete(t.id);else examSelectedTopics.add(t.id);card.classList.toggle('selected');};grid.appendChild(card);});}
+function examSelectAll(){EXAM_TOPICS.forEach(t=>examSelectedTopics.add(t.id));buildExamTopicGrid();}
+function examSelectNone(){examSelectedTopics.clear();buildExamTopicGrid();}
+function examStart(){if(!examSelectedTopics.size){alert('Select at least one topic.');return;}examActive=true;examQNum=0;examScore=0;examTotal=0;examTaskComplete=false;document.getElementById('exam-setup').style.display='none';document.getElementById('exam-results').style.display='none';document.getElementById('exam-active').style.display='block';examNext();}
+function examNext(){examTaskComplete=false;document.getElementById('exam-next-btn').style.display='none';const topics=[...examSelectedTopics];const topic=pick(topics);examQNum++;examTotal++;document.getElementById('exam-prog').textContent='Question '+examQNum;document.getElementById('exam-topic-label').textContent=topic.toUpperCase().replace('HUTCKER','HU-TUCKER').replace('MATCHAIN','MATRIX CHAIN').replace('RABINKARP','RABIN-KARP');const container=document.getElementById('exam-q-container');container.innerHTML='';
+  if(topic==='huffman'){const inp=pick(EXAM_INPUTS_HUFFMAN);container.innerHTML='<div class="quiz-q">Build the Huffman tree for: <b style="font-family:var(--mono);color:var(--accent);">'+inp+'</b></div>';showPage('huffman');document.getElementById('huff-input').value=inp;huffLoad(inp);container.innerHTML+='<div class="hint-box" style="margin-top:.5rem;">Merge complete on the Huffman page, then return here.</div><button class="btn btn-green" onclick="examTaskDone()">Mark complete ✓</button>';}
+  else if(topic==='hutcker'){const inp=pick(EXAM_INPUTS_HT);showPage('hutcker');document.getElementById('ht-input').value=inp;htLoad(inp);container.innerHTML='<div class="quiz-q">Complete all three phases of Hu-Tucker for:<br><b style="font-family:var(--mono);color:var(--accent);">'+inp+'</b></div><button class="btn btn-green" onclick="examTaskDone()">Mark complete ✓</button>';}
+  else if(topic==='gzip'){const inp=pick(EXAM_INPUTS_GZIP);showPage('gzip');gzipLoad(inp);container.innerHTML='<div class="quiz-q">Gzip encode: <b style="font-family:var(--mono);color:var(--accent);">'+inp+'</b></div><button class="btn btn-green" onclick="examTaskDone()">Mark complete ✓</button>';}
+  else if(topic==='entropy'){const inp=pick(EXAM_INPUTS_ENT);showPage('entropy');entropyCalc(inp);container.innerHTML='<div class="quiz-q">Calculate entropy for: <b style="font-family:var(--mono);color:var(--accent);">'+inp+'</b></div><button class="btn btn-green" onclick="examTaskDone()">Mark complete ✓</button>';}
+  else if(topic==='decode'){const inp=pick(EXAM_INPUTS_HUFFMAN);showPage('decode');decodeLoad(inp);container.innerHTML='<div class="quiz-q">Decode the bitstring on the Decode page. Symbols: <b style="font-family:var(--mono);color:var(--accent);">'+inp+'</b></div><button class="btn btn-green" onclick="examTaskDone()">Mark complete ✓</button>';}
+  else if(topic==='master'){showPage('master');masterNew();container.innerHTML='<div class="quiz-q">Solve the recurrence on the Master Theorem page.</div><button class="btn btn-green" onclick="examTaskDone()">Mark complete ✓</button>';}
+  else if(topic==='recurrence'){showPage('recurrence');recurNew();container.innerHTML='<div class="quiz-q">Write the recurrence on the Recurrence page.</div><button class="btn btn-green" onclick="examTaskDone()">Mark complete ✓</button>';}
+  else if(topic==='rabinkarp'){showPage('rabinkarp');const texts=['31415926','abcabc','aababab'];const patterns=['26','ab','ab'];const idx=Math.floor(Math.random()*texts.length);document.getElementById('rk-text').value=texts[idx];document.getElementById('rk-pattern').value=patterns[idx];document.getElementById('rk-d').value=texts[idx].match(/\d/)?10:26;document.getElementById('rk-q').value=11;rkLoad();container.innerHTML='<div class="quiz-q">Complete the Rabin-Karp hash computation on the Rabin-Karp page.</div><button class="btn btn-green" onclick="examTaskDone()">Mark complete ✓</button>';}
+  else if(topic==='knapsack'){showPage('knapsack');ksNew();container.innerHTML='<div class="quiz-q">Fill the Knapsack DP table on the Knapsack page.</div><button class="btn btn-green" onclick="examTaskDone()">Mark complete ✓</button>';}
+  else if(topic==='lcs'){showPage('lcs');lcsNew();container.innerHTML='<div class="quiz-q">Fill the LCS table on the LCS page.</div><button class="btn btn-green" onclick="examTaskDone()">Mark complete ✓</button>';}
+  else if(topic==='matchain'){showPage('matchain');mcNew();container.innerHTML='<div class="quiz-q">Fill the Matrix Chain table on the Matrix Chain page.</div><button class="btn btn-green" onclick="examTaskDone()">Mark complete ✓</button>';}
+  else if(topic==='parallel'){showPage('parallel');parNew();container.innerHTML='<div class="quiz-q">Compute PRAM metrics on the Parallel page.</div><button class="btn btn-green" onclick="examTaskDone()">Mark complete ✓</button>';}
+  else if(topic==='quiz'){const qFn=pick(QUIZ_BANK);const q=qFn();container.innerHTML='';const ql=document.createElement('div');ql.className='exam-q-label';ql.textContent=q.topic;container.appendChild(ql);const qd=document.createElement('div');qd.className='quiz-q';qd.textContent=q.q;container.appendChild(qd);const optsEl=document.createElement('div');optsEl.className='mc-options';const fb=document.createElement('div');fb.className='fb info';fb.style.display='none';const shuffled=[...q.opts.map((o,i)=>({o,i}))];shuffle(shuffled);let answered=false;shuffled.forEach(({o,i})=>{const btn=document.createElement('button');btn.className='mc-opt';btn.textContent=o;btn.onclick=()=>{if(answered)return;answered=true;const correct=i===q.correct;btn.classList.add(correct?'correct':'wrong');optsEl.querySelectorAll('.mc-opt').forEach(b=>{b.disabled=true;const oi=shuffled.find(s=>s.o===b.textContent)?.i;if(oi===q.correct&&b!==btn)b.classList.add('correct');});if(correct){examScore++;setFBEl(fb,'ok','✓ Correct!');}else{setFBEl(fb,'err','✗ Correct: '+q.opts[q.correct]);}fb.style.display='flex';setTimeout(()=>examTaskDone(),1000);};optsEl.appendChild(btn);});container.appendChild(optsEl);container.appendChild(fb);}}
+function examTaskDone(){examTaskComplete=true;document.getElementById('exam-next-btn').style.display='block';}
+function examEnd(){examActive=false;document.getElementById('exam-active').style.display='none';document.getElementById('exam-results').style.display='block';const pct=examTotal>0?Math.round(examScore/examTotal*100):0;document.getElementById('exam-score-display').textContent=examScore+' / '+examTotal;document.getElementById('exam-score-detail').textContent=pct+'% — '+(pct>=80?'solid performance':'keep drilling');}
+function examRestart(){examActive=false;document.getElementById('exam-active').style.display='none';document.getElementById('exam-results').style.display='none';document.getElementById('exam-setup').style.display='block';}
+
+// ═══════════════════════════════════════════════════ INIT
+buildExamTopicGrid();
+examSelectAll();
+</script>
+</body>
+</html>
