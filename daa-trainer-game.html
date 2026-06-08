@@ -134,11 +134,13 @@ input[type=text]::placeholder,input[type=number]::placeholder{color:var(--text3)
 .decoded-output{font-family:var(--mono);font-size:1.2rem;letter-spacing:.1em;padding:10px 14px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);min-height:44px;color:var(--green);margin-bottom:1rem;}
 .quiz-q{font-size:1rem;font-weight:500;line-height:1.6;margin-bottom:1.5rem;padding:16px;background:var(--bg3);border-radius:8px;border-left:3px solid var(--accent);}
 .mc-options{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem;}
-.mc-opt{padding:12px 16px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;font-family:var(--mono);font-size:.9rem;cursor:pointer;transition:all .15s;text-align:left;}
+.mc-opt{padding:12px 16px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;font-family:var(--mono);font-size:.9rem;color:var(--text);cursor:pointer;transition:all .15s;text-align:left;}
 .mc-opt:hover:not(:disabled){border-color:var(--accent);background:var(--accent-dim);color:var(--accent);}
 .mc-opt.correct{background:var(--green-dim);border-color:var(--green);color:var(--green);}
 .mc-opt.wrong{background:var(--red-dim);border-color:var(--red);color:var(--red);}
-.mc-opt:disabled{cursor:default;}
+.mc-opt.mc-locked{cursor:default;pointer-events:none;color:var(--text2);}
+.mc-opt.correct.mc-locked{color:var(--green);}
+.mc-opt.wrong.mc-locked{color:var(--red);}
 .quiz-score{font-family:var(--mono);font-size:.85rem;color:var(--text2);}
 .score-num{color:var(--amber);font-weight:700;font-size:1rem;}
 .exam-header{background:var(--amber-dim);border:1px solid var(--amber);border-radius:10px;padding:16px 20px;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
@@ -221,8 +223,9 @@ input[type=text]::placeholder,input[type=number]::placeholder{color:var(--text3)
 
 <div id="nav-wrap">
   <div id="nav-top">
-    <span class="brand">DAA Trainer</span>
-    <button class="week-tab active" onclick="switchWeek('w7')" id="wtab-w7">Week 7 — Compression</button>
+    <span class="brand" onclick="showHome()" style="cursor:pointer;" title="Home">DAA Trainer</span>
+    <button class="week-tab active" onclick="showHome()" id="wtab-home" style="color:var(--text2);">Home</button>
+    <button class="week-tab" onclick="switchWeek('w7')" id="wtab-w7">Week 7 — Compression</button>
     <button class="week-tab" onclick="switchWeek('rev')" id="wtab-rev">Review</button>
     <button class="week-tab" onclick="switchWeek('w8')" id="wtab-w8">Week 8 — String Matching</button>
     <button class="week-tab" onclick="switchWeek('w910')" id="wtab-w910">Week 9-10 — Dynamic Programming</button>
@@ -230,8 +233,8 @@ input[type=text]::placeholder,input[type=number]::placeholder{color:var(--text3)
     <button class="week-tab wk-exam" onclick="switchWeek('special')" id="wtab-special">Quiz &amp; Exam</button>
   </div>
   <div id="nav-bot">
-    <div class="week-topics active" id="wtopics-w7">
-      <button class="topic-tab active" onclick="showPage('huffman')" data-page="huffman">Huffman</button>
+    <div class="week-topics" id="wtopics-w7">
+      <button class="topic-tab" onclick="showPage('huffman')" data-page="huffman">Huffman</button>
       <button class="topic-tab" onclick="showPage('hutcker')" data-page="hutcker">Hu-Tucker</button>
       <button class="topic-tab" onclick="showPage('gzip')" data-page="gzip">Gzip</button>
       <button class="topic-tab" onclick="showPage('entropy')" data-page="entropy">Entropy</button>
@@ -259,8 +262,106 @@ input[type=text]::placeholder,input[type=number]::placeholder{color:var(--text3)
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════ WELCOME PAGE -->
+<div class="page active" id="page-home" style="max-width:1400px;">
+  <div style="margin-bottom:2rem;">
+    <div style="font-size:1.8rem;font-weight:800;letter-spacing:-.04em;margin-bottom:.4rem;">DAA Exam Trainer</div>
+    <div style="font-family:var(--mono);font-size:.82rem;color:var(--text3);letter-spacing:.04em;">Interactive practice for your Design and Analysis of Algorithms exam. Work through each topic, then test yourself in Exam Mode.</div>
+  </div>
+
+  <!-- HOW TO USE -->
+  <div class="panel" style="margin-bottom:1.5rem;">
+    <div class="panel-title">How to use this trainer</div>
+    <div style="font-family:var(--mono);font-size:.82rem;color:var(--text2);line-height:2;">
+      Each topic has a <strong style="color:var(--accent);">practice page</strong> where you work through problems step by step — the trainer checks each answer as you go and tells you if you're wrong before you continue.<br>
+      Use the <strong style="color:var(--amber);">Random</strong> buttons to generate new problems. Use the <strong style="color:var(--green);">Concept &amp; Method</strong> panels (where present) to review the algorithm before practising.<br>
+      When you're comfortable with individual topics, hit <strong style="color:var(--amber);">&#9889; Exam Mode</strong> to get a mixed set of questions under timed conditions.
+    </div>
+  </div>
+
+  <!-- TOPIC GRID -->
+  <div class="panel-title" style="margin-bottom:.75rem;">Topics</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:2rem;">
+
+    <div style="grid-column:1/-1;font-family:var(--mono);font-size:.68rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding-bottom:2px;border-bottom:1px solid var(--border);">Week 7 — Compression</div>
+
+    <div class="topic-card" onclick="showPage('huffman')">
+      <div class="tc-name">Huffman Coding</div>
+      <div class="tc-desc">Build a tree by merging lowest-frequency nodes. Practice greedy bottom-up construction.</div>
+    </div>
+    <div class="topic-card" onclick="showPage('decode')">
+      <div class="tc-name">Huffman Decode</div>
+      <div class="tc-desc">Given a tree and a bitstring, decode symbol by symbol. Two modes: walk or validate.</div>
+    </div>
+    <div class="topic-card" onclick="showPage('hutcker')">
+      <div class="tc-name">Hu-Tucker</div>
+      <div class="tc-desc">Three-phase optimal alphabetic prefix code. Combination, depth assignment, reconstruction.</div>
+    </div>
+    <div class="topic-card" onclick="showPage('gzip')">
+      <div class="tc-name">Gzip / Ziv-Lempel</div>
+      <div class="tc-desc">Encode a string using (distance, length) back-reference pairs with a sliding window.</div>
+    </div>
+    <div class="topic-card" onclick="showPage('entropy')">
+      <div class="tc-name">Shannon Entropy</div>
+      <div class="tc-desc">Calculate H = Σ −p log₂ p. Includes exam shortcut for calculators without log₂.</div>
+    </div>
+
+    <div style="grid-column:1/-1;font-family:var(--mono);font-size:.68rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding-bottom:2px;border-bottom:1px solid var(--border);margin-top:.5rem;">Review</div>
+
+    <div class="topic-card" onclick="showPage('master')">
+      <div class="tc-name">Master Theorem</div>
+      <div class="tc-desc">Identify case 1/2/3 and state T(n) for divide-and-conquer recurrences.</div>
+    </div>
+    <div class="topic-card" onclick="showPage('recurrence')">
+      <div class="tc-name">Recurrence Writing</div>
+      <div class="tc-desc">Given a recursive algorithm, write T(n) and solve for complexity.</div>
+    </div>
+
+    <div style="grid-column:1/-1;font-family:var(--mono);font-size:.68rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding-bottom:2px;border-bottom:1px solid var(--border);margin-top:.5rem;">Week 8 — String Matching</div>
+
+    <div class="topic-card" onclick="showPage('rabinkarp')">
+      <div class="tc-name">Rabin-Karp</div>
+      <div class="tc-desc">Compute h, p, t₀ and rolling hashes step by step. ASCII and A=1 encoding modes.</div>
+    </div>
+
+    <div style="grid-column:1/-1;font-family:var(--mono);font-size:.68rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding-bottom:2px;border-bottom:1px solid var(--border);margin-top:.5rem;">Week 9-10 — Dynamic Programming</div>
+
+    <div class="topic-card" onclick="showPage('knapsack')">
+      <div class="tc-name">0/1 Knapsack DP</div>
+      <div class="tc-desc">Fill the P[i,k] table cell by cell. Max profit using items i..n with capacity k.</div>
+    </div>
+    <div class="topic-card" onclick="showPage('lcs')">
+      <div class="tc-name">LCS</div>
+      <div class="tc-desc">Fill the c[i,j] longest common subsequence table and trace back the result.</div>
+    </div>
+    <div class="topic-card" onclick="showPage('matchain')">
+      <div class="tc-name">Matrix Chain</div>
+      <div class="tc-desc">Find optimal parenthesisation to minimise scalar multiplications.</div>
+    </div>
+
+    <div style="grid-column:1/-1;font-family:var(--mono);font-size:.68rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding-bottom:2px;border-bottom:1px solid var(--border);margin-top:.5rem;">Week 11 — Parallel</div>
+
+    <div class="topic-card" onclick="showPage('parallel')">
+      <div class="tc-name">PRAM Analysis</div>
+      <div class="tc-desc">Compute T*(n), T(n,p), speedup, efficiency, and cost for parallel algorithms.</div>
+    </div>
+
+    <div style="grid-column:1/-1;font-family:var(--mono);font-size:.68rem;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding-bottom:2px;border-bottom:1px solid var(--border);margin-top:.5rem;">Assessment</div>
+
+    <div class="topic-card" onclick="showPage('quiz')" style="border-color:var(--border2);">
+      <div class="tc-name">Quick Quiz</div>
+      <div class="tc-desc">Multiple choice questions across all topics. Good for a fast confidence check.</div>
+    </div>
+    <div class="topic-card" onclick="showPage('exam')" style="border-color:var(--amber);background:var(--amber-dim);">
+      <div class="tc-name" style="color:var(--amber);">&#9889; Exam Mode</div>
+      <div class="tc-desc" style="color:var(--text2);">Pick topics and get a timed mixed exam. Closest thing to the real thing.</div>
+    </div>
+
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════════════════════ HUFFMAN PAGE -->
-<div class="page active" id="page-huffman">
+<div class="page" id="page-huffman">
   <div class="page-title">Huffman Coding</div>
   <div class="page-sub">// greedy bottom-up — always merge the two lowest frequency nodes</div>
   <div class="preset-strip" style="margin-bottom:.6rem;">
@@ -993,18 +1094,17 @@ input[type=text]::placeholder,input[type=number]::placeholder{color:var(--text3)
 <div class="page" id="page-quiz">
   <div class="page-title">Quick Quiz</div>
   <div class="page-sub">// multiple choice — tests concepts and algorithm knowledge across all topics</div>
-  <div class="row mt1" style="margin-bottom:1.5rem;">
-    <button class="btn btn-primary" onclick="quizNext()">New Question</button>
-    <span class="quiz-score">Score: <span class="score-num" id="quiz-correct">0</span> / <span id="quiz-total">0</span></span>
-    <button class="btn" onclick="quizReset()">Reset score</button>
-  </div>
   <div class="panel" style="max-width:700px;">
     <div class="exam-q-label" id="quiz-topic-label">—</div>
-    <div class="quiz-q" id="quiz-q">Press "New Question" to begin.</div>
+    <div class="quiz-q" id="quiz-q"></div>
     <div class="mc-options" id="quiz-opts"></div>
     <div class="fb info" id="quiz-fb" style="display:none;"></div>
-    <div class="row mt1">
-      <button class="btn btn-primary" id="quiz-next-btn" onclick="quizNext()" style="display:none;">Next →</button>
+    <div class="row mt1" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <button class="btn btn-primary" id="quiz-next-btn" onclick="quizNext()" style="display:none;">Next question →</button>
+      <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
+        <span class="quiz-score">Score: <span class="score-num" id="quiz-correct">0</span> / <span id="quiz-total">0</span></span>
+        <button class="btn" onclick="quizReset()">Reset</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1063,6 +1163,14 @@ function complexEq(a,b){return normaliseComplexity(a)===normaliseComplexity(b);}
 // ═══════════════════════════════════════════════════ NAV
 // Map each page to its week group
 const PAGE_WEEK={huffman:'w7',hutcker:'w7',gzip:'w7',entropy:'w7',decode:'w7',master:'rev',recurrence:'rev',rabinkarp:'w8',knapsack:'w910',lcs:'w910',matchain:'w910',parallel:'w11',quiz:'special',exam:'special'};
+function showHome(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-home').classList.add('active');
+  document.querySelectorAll('.week-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('wtab-home').classList.add('active');
+  document.querySelectorAll('.week-topics').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.topic-tab').forEach(t=>t.classList.remove('active'));
+}
 function switchWeek(wk){
   document.querySelectorAll('.week-tab').forEach(t=>t.classList.remove('active'));
   const wb=document.getElementById('wtab-'+wk);if(wb)wb.classList.add('active');
@@ -1078,6 +1186,8 @@ function showPageOnly(name){
   // Update topic tab active state
   document.querySelectorAll('.topic-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.topic-tab[data-page="'+name+'"]').forEach(t=>t.classList.add('active'));
+  // Auto-load first question on quiz page
+  if(name==='quiz' && typeof quizNext==='function' && !document.getElementById('quiz-opts').children.length) quizNext();
 }
 function showPage(name){
   // Ensure correct week tab + topic row is shown
@@ -1600,7 +1710,7 @@ const QUIZ_BANK=[
   ()=>({topic:'Recurrence',q:'T(n) = T(n/2) + 1 solves to:',opts:['O(n)','O(n log n)','O(log n)','O(1)'],correct:2}),
   ()=>({topic:'HT Phase 3',q:'In Hu-Tucker Phase 3, process which depth first?',opts:['Shallowest (closest to root)','Deepest level first','Any depth in any order','Only depth 1 nodes'],correct:1}),
 ];
-function quizNext(){quizAnswered=false;const qFn=pick(QUIZ_BANK);const q=qFn();quizTotal++;document.getElementById('quiz-total').textContent=quizTotal;document.getElementById('quiz-topic-label').textContent=q.topic;document.getElementById('quiz-q').textContent=q.q;const optsEl=document.getElementById('quiz-opts');optsEl.innerHTML='';const fb=document.getElementById('quiz-fb');fb.style.display='none';document.getElementById('quiz-next-btn').style.display='none';const shuffledOpts=[...q.opts.map((o,i)=>({o,i}))];shuffle(shuffledOpts);shuffledOpts.forEach(({o,i})=>{const btn=document.createElement('button');btn.className='mc-opt';btn.textContent=o;btn.onclick=()=>{if(quizAnswered)return;quizAnswered=true;const correct=i===q.correct;btn.classList.add(correct?'correct':'wrong');optsEl.querySelectorAll('.mc-opt').forEach(b=>{b.disabled=true;const origIdx=shuffledOpts.find(s=>s.o===b.textContent)?.i;if(origIdx===q.correct&&b!==btn)b.classList.add('correct');});if(correct){quizCorrect++;document.getElementById('quiz-correct').textContent=quizCorrect;setFBEl(fb,'ok','✓ Correct!');}else{setFBEl(fb,'err','✗ Wrong. Correct: '+q.opts[q.correct]);}fb.style.display='flex';document.getElementById('quiz-next-btn').style.display='block';};optsEl.appendChild(btn);});}
+function quizNext(){quizAnswered=false;const qFn=pick(QUIZ_BANK);const q=qFn();quizTotal++;document.getElementById('quiz-total').textContent=quizTotal;document.getElementById('quiz-topic-label').textContent=q.topic;document.getElementById('quiz-q').textContent=q.q;const optsEl=document.getElementById('quiz-opts');optsEl.innerHTML='';const fb=document.getElementById('quiz-fb');fb.style.display='none';document.getElementById('quiz-next-btn').style.display='none';const shuffledOpts=[...q.opts.map((o,i)=>({o,i}))];shuffle(shuffledOpts);shuffledOpts.forEach(({o,i})=>{const btn=document.createElement('button');btn.className='mc-opt';btn.textContent=o;btn.onclick=()=>{if(quizAnswered)return;quizAnswered=true;const correct=i===q.correct;btn.classList.add(correct?'correct':'wrong');optsEl.querySelectorAll('.mc-opt').forEach(b=>{b.classList.add('mc-locked');const origIdx=shuffledOpts.find(s=>s.o===b.textContent)?.i;if(origIdx===q.correct&&b!==btn)b.classList.add('correct');});if(correct){quizCorrect++;document.getElementById('quiz-correct').textContent=quizCorrect;setFBEl(fb,'ok','✓ Correct!');}else{setFBEl(fb,'err','✗ Wrong. Correct: '+q.opts[q.correct]);}fb.style.display='flex';document.getElementById('quiz-next-btn').style.display='block';};optsEl.appendChild(btn);});}
 function quizReset(){quizCorrect=0;quizTotal=0;document.getElementById('quiz-correct').textContent=0;document.getElementById('quiz-total').textContent=0;}
 
 // ═══════════════════════════════════════════════════ EXAM MODE
