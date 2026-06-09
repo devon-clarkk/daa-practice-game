@@ -217,9 +217,91 @@ input[type=text]::placeholder,input[type=number]::placeholder{color:var(--text3)
 .rk-input-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end;}
 .rk-input-row label{font-family:var(--mono);font-size:.72rem;color:var(--text3);display:block;margin-bottom:3px;}
 .rk-input-row input{width:90px;}
+/* ── SCIENTIFIC CALCULATOR ── */
+#calc-panel{position:fixed;top:0;left:-300px;width:300px;height:100vh;background:var(--bg2);border-right:1px solid var(--border);z-index:200;transition:left .25s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:4px 0 24px rgba(0,0,0,.4);}
+#calc-panel.open{left:0;}
+#calc-tab{position:fixed;top:50%;left:0;transform:translateY(-50%);z-index:201;background:var(--bg3);border:1px solid var(--border);border-left:none;border-radius:0 6px 6px 0;padding:10px 6px;cursor:pointer;writing-mode:vertical-rl;font-family:var(--mono);font-size:.72rem;color:var(--text2);letter-spacing:.1em;transition:left .25s cubic-bezier(.4,0,.2,1),color .15s,background .15s;}
+#calc-tab:hover{color:var(--text);background:var(--bg4);}
+#calc-panel.open~#calc-tab,#calc-tab.open{left:300px;}
+#calc-display{padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+#calc-expr{font-family:var(--mono);font-size:.7rem;color:var(--text3);min-height:16px;text-align:right;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#calc-screen{font-family:var(--mono);font-size:1.6rem;font-weight:700;color:var(--text);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#calc-screen.error{color:var(--red);font-size:1rem;}
+#calc-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:10px;overflow-y:auto;flex:1;}
+.ck{padding:9px 4px;border-radius:5px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:var(--mono);font-size:.78rem;cursor:pointer;transition:all .1s;text-align:center;user-select:none;}
+.ck:hover{background:var(--bg4);border-color:var(--border2);}
+.ck:active{transform:scale(.95);}
+.ck.op{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+.ck.op:hover{background:#0d2e52;}
+.ck.fn{background:var(--bg2);color:var(--purple);border-color:var(--border2);}
+.ck.fn:hover{background:var(--purple-dim);}
+.ck.eq{background:#238636;border-color:#2ea043;color:#fff;}
+.ck.eq:hover{background:#2ea043;}
+.ck.clr{color:var(--red);border-color:var(--red);background:var(--red-dim);}
+.ck.clr:hover{background:#3d1a1a;}
+.ck.span2{grid-column:span 2;}
 </style>
 </head>
 <body>
+
+<!-- ── SCIENTIFIC CALCULATOR PANEL ── -->
+<div id="calc-panel">
+  <div id="calc-display">
+    <div id="calc-expr"></div>
+    <div id="calc-screen">0</div>
+  </div>
+  <div id="calc-keys">
+    <!-- Row 1: clear / special -->
+    <button class="ck clr" onclick="cAC()">AC</button>
+    <button class="ck clr" onclick="cDel()">⌫</button>
+    <button class="ck fn" onclick="cPlusMinus()">+/−</button>
+    <button class="ck op" onclick="cOp('%')">%</button>
+    <!-- Row 2: sci functions -->
+    <button class="ck fn" onclick="cFn('sin')">sin</button>
+    <button class="ck fn" onclick="cFn('cos')">cos</button>
+    <button class="ck fn" onclick="cFn('tan')">tan</button>
+    <button class="ck fn" onclick="cFn('sqrt')">√</button>
+    <!-- Row 3: more sci -->
+    <button class="ck fn" onclick="cFn('log')">log</button>
+    <button class="ck fn" onclick="cFn('ln')">ln</button>
+    <button class="ck fn" onclick="cFn('sq')">x²</button>
+    <button class="ck fn" onclick="cFn('inv')">1/x</button>
+    <!-- Row 4: constants + power -->
+    <button class="ck fn" onclick="cConst('pi')">π</button>
+    <button class="ck fn" onclick="cConst('e')">e</button>
+    <button class="ck fn" onclick="cFn('pow10')">10ˣ</button>
+    <button class="ck op" onclick="cOp('^')">xʸ</button>
+    <!-- Row 5: parens + mem -->
+    <button class="ck fn" onclick="cParen('(')"> ( </button>
+    <button class="ck fn" onclick="cParen(')')"> ) </button>
+    <button class="ck fn" onclick="cMem('store')">MS</button>
+    <button class="ck fn" onclick="cMem('recall')">MR</button>
+    <!-- Row 6–9: digits + ops -->
+    <button class="ck" onclick="cDigit('7')">7</button>
+    <button class="ck" onclick="cDigit('8')">8</button>
+    <button class="ck" onclick="cDigit('9')">9</button>
+    <button class="ck op" onclick="cOp('/')">÷</button>
+
+    <button class="ck" onclick="cDigit('4')">4</button>
+    <button class="ck" onclick="cDigit('5')">5</button>
+    <button class="ck" onclick="cDigit('6')">6</button>
+    <button class="ck op" onclick="cOp('*')">×</button>
+
+    <button class="ck" onclick="cDigit('1')">1</button>
+    <button class="ck" onclick="cDigit('2')">2</button>
+    <button class="ck" onclick="cDigit('3')">3</button>
+    <button class="ck op" onclick="cOp('-')">−</button>
+
+    <button class="ck span2" onclick="cDigit('0')">0</button>
+    <button class="ck" onclick="cDot()">.</button>
+    <button class="ck op" onclick="cOp('+')">+</button>
+
+    <button class="ck eq span2" onclick="cEquals()">=</button>
+    <button class="ck fn" onclick="cFn('abs')">|x|</button>
+    <button class="ck fn" onclick="cFn('floor')">⌊x⌋</button>
+  </div>
+</div>
+<div id="calc-tab" onclick="calcToggle()">CALC</div>
 
 <div id="nav-wrap">
   <div id="nav-top">
@@ -1008,9 +1090,16 @@ input[type=text]::placeholder,input[type=number]::placeholder{color:var(--text3)
 <div class="page" id="page-matchain">
   <div class="page-title">Matrix Chain Multiplication</div>
   <div class="page-sub">// fill m[i,j] = min scalar multiplications to compute Aᵢ..Aⱼ</div>
-  <div class="row mt1" style="margin-bottom:.75rem;">
-    <button class="btn btn-primary" onclick="mcNew()">New Problem</button>
+  <div class="row mt1" style="margin-bottom:.5rem;">
+    <button class="btn btn-primary" onclick="mcNew()">Random Problem</button>
     <button class="btn" onclick="mcReset()">Reset</button>
+  </div>
+  <div class="row mt1" style="margin-bottom:.75rem;align-items:flex-end;gap:8px;">
+    <div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--text3);margin-bottom:4px;">Custom dimensions (e.g. <span style="color:var(--accent);">10×20, 20×50, 50×1</span>)</div>
+      <input type="text" id="mc-custom-input" placeholder="10×20, 20×50, 50×1" style="width:300px;">
+    </div>
+    <button class="btn btn-green" onclick="mcLoadCustom()">Load</button>
   </div>
   <div class="grid2">
     <div><div class="panel">
@@ -1669,7 +1758,43 @@ const MC_PROBLEMS=[
   {n:5,p:[2,3,4,2,3,1],label:'A1:2×3, A2:3×4, A3:4×2, A4:2×3, A5:3×1'},
 ];
 function computeMcTable(n,p){const m=[];for(let i=0;i<=n;i++){m.push([]);for(let j=0;j<=n;j++)m[i].push(i===j?0:Infinity);}for(let l=2;l<=n;l++){for(let i=1;i<=n-l+1;i++){const j=i+l-1;for(let k=i;k<j;k++){const q=m[i][k]+m[k+1][j]+p[i-1]*p[k]*p[j];if(q<m[i][j])m[i][j]=q;}}}return m;}
-function mcNew(){const prob=pick(MC_PROBLEMS);mcData=prob;const{n,p}=prob;mcTable=computeMcTable(n,p);mcFilled=[];for(let i=0;i<=n;i++){mcFilled.push([]);for(let j=0;j<=n;j++)mcFilled[i].push(i===j||i===0||j===0||i>j);}mcSelectedCell=null;document.getElementById('mc-done').style.display='none';document.getElementById('mc-result').style.display='none';document.getElementById('mc-log').innerHTML='';setFB('mc-fb','info','Fill diagonal by diagonal. Diagonal d=1 means m[i,i]=0 (pre-filled). Start with d=2.');document.getElementById('mc-current-cell').textContent='—';document.getElementById('mc-problem').innerHTML=prob.label+'<br>Dimensions: p = ['+p.join(', ')+']<br><span style="color:var(--text3);font-size:.78rem;">m[i,j] = min_{i≤k&lt;j} (m[i,k]+m[k+1,j]+p[i-1]·p[k]·p[j])</span>';renderMcTable();}
+function mcLoadCustom(){
+  const raw=document.getElementById('mc-custom-input').value.trim();
+  if(!raw){setFB('mc-fb','err','Enter dimensions first.');return;}
+  // Accept formats: "10×20, 20×50" or "10x20, 20x50" or "10 20, 20 50" or just "10 20 50 1 100"
+  // Try space/x/× separated list of numbers first (dimension array)
+  const nums=raw.replace(/[×xX,]/g,' ').trim().split(/\s+/).map(Number);
+  if(nums.some(isNaN)||nums.some(n=>n<=0)){setFB('mc-fb','err','Invalid input — use positive integers only.');return;}
+  // If they entered pairs like "10×20, 20×50", after replacing separators we get [10,20,20,50,50,1]
+  // Deduplicate consecutive equal values to get the p array
+  let p;
+  if(nums.length>=2){
+    // Try to build p by deduplicating: each adjacent pair shares a dimension
+    p=[nums[0]];
+    for(let i=1;i<nums.length;i++){
+      if(i%2===1){// right side of a pair
+        p.push(nums[i]);
+      }
+      // skip left side of next pair (should equal previous right side)
+    }
+    // Validate: if they entered pairs, odd indices should match even indices
+    // Actually just check if they gave us a flat dimension array or pairs
+    if(nums.length===p.length){
+      // already a flat p array (e.g. "10 20 50 1 100")
+      p=nums;
+    }
+  } else {
+    setFB('mc-fb','err','Need at least 2 matrices.');return;
+  }
+  const n=p.length-1;
+  if(n<2){setFB('mc-fb','err','Need at least 2 matrices (3 dimensions).');return;}
+  if(n>7){setFB('mc-fb','err','Max 7 matrices for readability.');return;}
+  const label=p.slice(0,n).map((r,i)=>'A'+(i+1)+':'+r+'×'+p[i+1]).join(', ');
+  const prob={n,p,label};
+  mcLoadProb(prob);
+}
+function mcLoadProb(prob){mcData=prob;const{n,p}=prob;mcTable=computeMcTable(n,p);mcFilled=[];for(let i=0;i<=n;i++){mcFilled.push([]);for(let j=0;j<=n;j++)mcFilled[i].push(i===j||i===0||j===0||i>j);}mcSelectedCell=null;document.getElementById('mc-done').style.display='none';document.getElementById('mc-result').style.display='none';document.getElementById('mc-log').innerHTML='';setFB('mc-fb','info','Fill diagonal by diagonal. Diagonal d=1 means m[i,i]=0 (pre-filled). Start with d=2.');document.getElementById('mc-current-cell').textContent='—';document.getElementById('mc-problem').innerHTML=prob.label+'<br>Dimensions: p = ['+p.join(', ')+']<br><span style="color:var(--text3);font-size:.78rem;">m[i,j] = min_{i≤k&lt;j} (m[i,k]+m[k+1,j]+p[i-1]·p[k]·p[j])</span>';renderMcTable();}
+function mcNew(){const prob=pick(MC_PROBLEMS);mcLoadProb(prob);}
 function mcReset(){mcData=null;mcTable=null;mcFilled=null;mcSelectedCell=null;document.getElementById('mc-table-wrap').innerHTML='—';document.getElementById('mc-problem').textContent='Press "New Problem" to begin.';document.getElementById('mc-done').style.display='none';document.getElementById('mc-result').style.display='none';document.getElementById('mc-log').innerHTML='';setFB('mc-fb','info','—');}
 function renderMcTable(){if(!mcData)return;const{n}=mcData;const wrap=document.getElementById('mc-table-wrap');wrap.innerHTML='';const table=document.createElement('table');table.className='dp-table';const hdr=document.createElement('tr');hdr.innerHTML='<th>m[i,j]</th>';for(let j=1;j<=n;j++)hdr.innerHTML+='<th>'+j+'</th>';table.appendChild(hdr);for(let i=1;i<=n;i++){const tr=document.createElement('tr');tr.innerHTML='<th>'+i+'</th>';for(let j=1;j<=n;j++){const td=document.createElement('td');if(i>j){td.textContent='—';td.style.color='var(--text3)';td.style.cursor='default';}else if(mcFilled[i][j]){td.className='filled';td.textContent=mcTable[i][j]===Infinity?'∞':mcTable[i][j];}else{td.textContent='?';if(mcSelectedCell&&mcSelectedCell[0]===i&&mcSelectedCell[1]===j)td.className='current';td.onclick=()=>mcSelectCell(i,j);}tr.appendChild(td);}table.appendChild(tr);}wrap.appendChild(table);}
 function mcSelectCell(i,j){if(!mcData)return;if(mcFilled[i][j])return;mcSelectedCell=[i,j];document.getElementById('mc-current-cell').textContent='m['+i+','+j+'] =';document.getElementById('mc-cell-val').value='';document.getElementById('mc-cell-val').focus();renderMcTable();}
@@ -1759,6 +1884,116 @@ function examRestart(){examActive=false;document.getElementById('exam-active').s
 // ═══════════════════════════════════════════════════ INIT
 buildExamTopicGrid();
 examSelectAll();
+
+// ═══════════════════════════════════════════════════ CALCULATOR
+let calcOpen=false,calcCurrent='0',calcExpr='',calcOp=null,calcPrev=null,calcJustEvaled=false,calcNewNum=false,calcMem=0,calcParens=0;
+function calcToggle(){calcOpen=!calcOpen;document.getElementById('calc-panel').classList.toggle('open',calcOpen);document.getElementById('calc-tab').classList.toggle('open',calcOpen);}
+function cScreen(){const s=document.getElementById('calc-screen');s.textContent=calcCurrent;s.className='';}
+function cError(msg){const s=document.getElementById('calc-screen');s.textContent=msg;s.className='error';calcCurrent='0';calcJustEvaled=true;}
+function cExpr(t){document.getElementById('calc-expr').textContent=t;}
+
+function cDigit(d){
+  if(calcJustEvaled||calcNewNum){calcCurrent=d;calcExpr='';calcJustEvaled=false;calcNewNum=false;}
+  else calcCurrent=calcCurrent==='0'?d:calcCurrent+d;
+  cScreen();
+}
+function cDot(){
+  if(calcJustEvaled||calcNewNum){calcCurrent='0.';calcJustEvaled=false;calcNewNum=false;}
+  else if(!calcCurrent.includes('.'))calcCurrent+='.';
+  cScreen();
+}
+function cPlusMinus(){
+  if(calcCurrent!=='0')calcCurrent=calcCurrent.startsWith('-')?calcCurrent.slice(1):'-'+calcCurrent;
+  cScreen();
+}
+function cDel(){
+  if(calcJustEvaled)return;
+  calcCurrent=calcCurrent.length>1?calcCurrent.slice(0,-1):'0';
+  cScreen();
+}
+function cAC(){calcCurrent='0';calcExpr='';calcOp=null;calcPrev=null;calcJustEvaled=false;calcNewNum=false;calcParens=0;cScreen();cExpr('');}
+
+function cOp(op){
+  const cur=parseFloat(calcCurrent);
+  if(calcOp&&!calcJustEvaled){
+    const res=cCalc(calcPrev,cur,calcOp);
+    if(res===null)return;
+    calcCurrent=cFmt(res);calcPrev=res;
+  } else {
+    calcPrev=cur;
+  }
+  calcOp=op;calcJustEvaled=false;calcNewNum=true;
+  const opSym={'+':'+','-':'−','*':'×','/':'÷','%':'%','^':'^'}[op]||op;
+  cExpr(cFmt(calcPrev)+' '+opSym);
+  cScreen();
+}
+function cCalc(a,b,op){
+  if(op==='+')return a+b;
+  if(op==='-')return a-b;
+  if(op==='*')return a*b;
+  if(op==='/')return b===0?(cError('Div by 0'),null):a/b;
+  if(op==='%')return a%b;
+  if(op==='^')return Math.pow(a,b);
+  return b;
+}
+function cEquals(){
+  if(!calcOp)return;
+  const cur=parseFloat(calcCurrent);
+  const opSym={'+':'+','-':'−','*':'×','/':'÷','%':'%','^':'^'}[calcOp]||calcOp;
+  cExpr(cFmt(calcPrev)+' '+opSym+' '+cFmt(cur)+' =');
+  const res=cCalc(calcPrev,cur,calcOp);
+  if(res===null)return;
+  calcCurrent=cFmt(res);calcOp=null;calcPrev=null;calcJustEvaled=true;
+  cScreen();
+}
+function cFmt(n){
+  if(n===null||isNaN(n))return 'Error';
+  if(!isFinite(n))return n>0?'∞':'-∞';
+  const s=parseFloat(n.toPrecision(10)).toString();
+  return s;
+}
+function cFn(fn){
+  const x=parseFloat(calcCurrent);
+  const deg=x*(Math.PI/180);
+  let r;
+  if(fn==='sin')r=Math.sin(deg);
+  else if(fn==='cos')r=Math.cos(deg);
+  else if(fn==='tan'){if(Math.abs(Math.cos(deg))<1e-12){cError('Undefined');return;}r=Math.tan(deg);}
+  else if(fn==='sqrt'){if(x<0){cError('√ of negative');return;}r=Math.sqrt(x);}
+  else if(fn==='log'){if(x<=0){cError('log(≤0)');return;}r=Math.log10(x);}
+  else if(fn==='ln'){if(x<=0){cError('ln(≤0)');return;}r=Math.log(x);}
+  else if(fn==='sq')r=x*x;
+  else if(fn==='inv'){if(x===0){cError('Div by 0');return;}r=1/x;}
+  else if(fn==='pow10')r=Math.pow(10,x);
+  else if(fn==='abs')r=Math.abs(x);
+  else if(fn==='floor')r=Math.floor(x);
+  else return;
+  cExpr(fn+'('+cFmt(x)+') =');
+  calcCurrent=cFmt(r);calcJustEvaled=true;cScreen();
+}
+function cConst(c){
+  calcCurrent=c==='pi'?cFmt(Math.PI):cFmt(Math.E);
+  calcJustEvaled=false;cScreen();
+}
+function cParen(p){
+  // append to expression display — lightweight paren tracking
+  if(p==='('){calcParens++;cExpr(document.getElementById('calc-expr').textContent+'(');}
+  else if(calcParens>0){calcParens--;cExpr(document.getElementById('calc-expr').textContent+')');}
+}
+function cMem(action){
+  if(action==='store'){calcMem=parseFloat(calcCurrent);cExpr('M = '+cFmt(calcMem));}
+  else{calcCurrent=cFmt(calcMem);calcJustEvaled=false;cScreen();}
+}
+// Keyboard support
+document.addEventListener('keydown',e=>{
+  if(!calcOpen)return;
+  if(e.key>='0'&&e.key<='9')cDigit(e.key);
+  else if(e.key==='.')cDot();
+  else if(e.key==='+'||e.key==='-'||e.key==='*'||e.key==='/')cOp(e.key);
+  else if(e.key==='Enter'||e.key==='=')cEquals();
+  else if(e.key==='Backspace')cDel();
+  else if(e.key==='Escape')cAC();
+});
 </script>
 </body>
 </html>
