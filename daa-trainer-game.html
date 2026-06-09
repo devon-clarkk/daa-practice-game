@@ -537,12 +537,18 @@ input[type=text]::placeholder,input[type=number]::placeholder{color:var(--text3)
     </div>
   </div>
   <div id="ht-phase2" style="display:none;">
-    <div class="panel">
-      <div class="panel-title">Depth assignment <span class="phase-badge p2">PHASE 2</span></div>
-      <div class="hint-box">Read depth of each original square node from the Phase 1 tree. Root = level 0.</div>
-      <div id="ht-p2-content"></div>
-      <div class="done-banner" id="ht-p2-done" style="display:flex;">✓ Depths assigned.</div>
-      <div class="row mt2"><button class="btn btn-green" onclick="htSetPhase(3)">Continue to Phase 3 →</button></div>
+    <div class="grid2">
+      <div><div class="panel">
+        <div class="panel-title">Depth assignment <span class="phase-badge p2">PHASE 2</span></div>
+        <div class="hint-box">Look at the Phase 1 tree on the right. For each original leaf symbol, read its depth. Root = level 0.</div>
+        <div id="ht-p2-content"></div>
+        <div class="done-banner" id="ht-p2-done" style="display:none;">✓ All depths correct!</div>
+        <div class="row mt2"><button class="btn btn-green" id="ht-p2-continue" onclick="htSetPhase(3)" style="display:none;">Continue to Phase 3 →</button></div>
+      </div></div>
+      <div><div class="panel">
+        <div class="panel-title">Phase 1 tree (reference)</div>
+        <div class="tree-container" id="ht-p2-tree"></div>
+      </div></div>
     </div>
   </div>
   <div id="ht-phase3" style="display:none;">
@@ -1370,7 +1376,51 @@ function isCompat(iA,iB){const lo=Math.min(iA,iB),hi=Math.max(iA,iB);for(let i=l
 function getCorrectHt(){let best=null,bf=Infinity,bi=Infinity;for(let i=0;i<htNodes.length;i++)for(let j=i+1;j<htNodes.length;j++){if(!isCompat(i,j))continue;const f=htNodes[i].freq+htNodes[j].freq;if(f<bf||(f===bf&&i<bi)){bf=f;bi=i;best=[htNodes[i],htNodes[j]];}}return best;}
 function htMerge(){if(htSel.length<2)return;const[uA,uB]=htSel;const iA=htNodes.indexOf(uA),iB=htNodes.indexOf(uB);if(!isCompat(iA,iB)){setFB('ht-fb','err','✗ Not compatible — square node between them.');addLog('ht-log','err','✗ Blocked');return;}const corr=getCorrectHt();const cs=corr[0].freq+corr[1].freq;const us=uA.freq+uB.freq;if(us>cs){setFB('ht-fb','err','✗ Not minimum. Expected: '+corr[0].label+':'+corr[0].freq+' + '+corr[1].label+':'+corr[1].freq+' = '+cs);addLog('ht-log','err','✗ Wrong pair');return;}const corrLoIdx=Math.min(htNodes.indexOf(corr[0]),htNodes.indexOf(corr[1]));const userLoIdx=Math.min(iA,iB);if(us===cs&&userLoIdx>corrLoIdx){setFB('ht-fb','err','✗ Tie — pick leftmost. Expected: '+corr[0].label+' + '+corr[1].label);addLog('ht-log','err','✗ Not leftmost');return;}const loIdx=Math.min(iA,iB),hiIdx=Math.max(iA,iB);const lN=htNodes[loIdx],rN=htNodes[hiIdx];const merged=mkNode('('+lN.label+'+'+rN.label+')',lN.freq+rN.freq,false,lN,rN);htNodes.splice(hiIdx,1);htNodes.splice(loIdx,1);htNodes.splice(loIdx,0,merged);htSel=[];setFB('ht-fb','ok','✓ '+lN.label+':'+lN.freq+' + '+rN.label+':'+rN.freq+' → '+merged.freq);addLog('ht-log','ok','✓ '+lN.label+'+'+rN.label+'='+merged.freq);updateHtSel();renderHtPool();renderSVGTree('ht-tree',htNodes,n=>n.label+':'+n.freq,COLS.ht);if(htNodes.length===1){htP1Tree=htNodes[0];document.getElementById('ht-p1-done').style.display='block';setFB('ht-fb','ok','✓ Phase 1 done! Go to Phase 2.');addLog('ht-log','ok','✓ Done');const p2=document.getElementById('ptab-2');if(p2){p2.disabled=false;p2.className='phase-tab p2';}}}
 function buildDepthMap(n,d,m){if(!n)return;if(n.isLeaf){m[n.label]=d;return;}buildDepthMap(n.left,d+1,m);buildDepthMap(n.right,d+1,m);}
-function htShowP2(){const dm={};buildDepthMap(htP1Tree,0,dm);const c=document.getElementById('ht-p2-content');if(!c)return;c.innerHTML='';const row=document.createElement('div');row.className='depth-row';htOrig.forEach(sym=>{if(dm[sym]===undefined)return;const ch=document.createElement('span');ch.className='depth-chip';ch.textContent=sym+' → depth '+dm[sym];row.appendChild(ch);});c.appendChild(row);const db=document.getElementById('ht-p2-done');if(db)db.style.display='flex';const p3=document.getElementById('ptab-3');if(p3){p3.disabled=false;p3.className='phase-tab p3';}p3Nodes=htOrig.filter(s=>dm[s]!==undefined).map(s=>mkP3Node(s,dm[s],true));}
+let htP2DepthMap={},htP2Correct={};
+function htShowP2(){
+  htP2DepthMap={};buildDepthMap(htP1Tree,0,htP2DepthMap);htP2Correct={};
+  // Copy Phase 1 tree to reference panel
+  const srcTree=document.getElementById('ht-tree');
+  const dstTree=document.getElementById('ht-p2-tree');
+  if(srcTree&&dstTree)dstTree.innerHTML=srcTree.innerHTML;
+  // Render one input row per original leaf symbol
+  const c=document.getElementById('ht-p2-content');if(!c)return;c.innerHTML='';
+  htOrig.forEach(sym=>{
+    if(htP2DepthMap[sym]===undefined)return;
+    htP2Correct[sym]=false;
+    const row=document.createElement('div');
+    row.className='ent-qa-row';row.id='ht-p2-row-'+sym;
+    row.innerHTML=
+      '<label class="ent-qa-label" style="min-width:80px;">Depth of <strong style="color:var(--accent);">'+sym+'</strong> =</label>'+
+      '<input type="number" id="ht-p2-input-'+sym+'" style="width:70px;" placeholder="?" min="0" onkeydown="if(event.key===\'Enter\')htCheckP2Depth(\''+sym+'\')">'+
+      '<button class="btn" style="padding:5px 10px;font-size:.8rem;" onclick="htCheckP2Depth(\''+sym+'\')">Check</button>'+
+      '<span class="fb info ent-qa-fb" id="ht-p2-fb-'+sym+'" style="margin:0;min-height:0;padding:5px 10px;font-size:.75rem;"></span>';
+    c.appendChild(row);
+  });
+}
+function htCheckP2Depth(sym){
+  const inp=document.getElementById('ht-p2-input-'+sym);
+  const fb=document.getElementById('ht-p2-fb-'+sym);
+  if(!inp||!fb)return;
+  const val=parseInt(inp.value);
+  const expected=htP2DepthMap[sym];
+  if(isNaN(val)){fb.className='fb err';fb.textContent='Enter a number.';return;}
+  if(val===expected){
+    htP2Correct[sym]=true;
+    inp.disabled=true;
+    fb.className='fb ok';fb.textContent='✓ depth '+expected;
+    // Check if all correct
+    const allDone=htOrig.every(s=>htP2DepthMap[s]===undefined||htP2Correct[s]);
+    if(allDone){
+      const db=document.getElementById('ht-p2-done');if(db)db.style.display='block';
+      const cont=document.getElementById('ht-p2-continue');if(cont)cont.style.display='inline-flex';
+      const p3=document.getElementById('ptab-3');if(p3){p3.disabled=false;p3.className='phase-tab p3';}
+      p3Nodes=htOrig.filter(s=>htP2DepthMap[s]!==undefined).map(s=>mkP3Node(s,htP2DepthMap[s],true));
+    }
+  } else {
+    fb.className='fb err';fb.textContent='✗ Got '+val+', try again.';
+  }
+}
 function renderP3Pool(){const pool=document.getElementById('p3-pool');if(!pool)return;pool.innerHTML='';p3Nodes.forEach(n=>{const ch=document.createElement('div');ch.className='p3-chip'+(n.isLeaf?'':' int');ch.innerHTML='<span class="sym">'+n.label+'</span><span class="dep">d='+n.depth+'</span>';if(p3Sel.find(s=>s.id===n.id))ch.classList.add('selected');ch.onclick=()=>p3Toggle(n);pool.appendChild(ch);});}
 function p3Toggle(n){const i=p3Sel.findIndex(s=>s.id===n.id);if(i>=0)p3Sel.splice(i,1);else{if(p3Sel.length>=2)p3Sel.shift();p3Sel.push(n);}updateP3Sel();renderP3Pool();}
 function updateP3Sel(){const[a,b]=p3Sel;const sa=document.getElementById('p3sel-a'),sb=document.getElementById('p3sel-b');if(sa){sa.textContent=a?a.label+'(d='+a.depth+')':'—';sa.className='sel-slot'+(a?' filled':'');}if(sb){sb.textContent=b?b.label+'(d='+b.depth+')':'—';sb.className='sel-slot'+(b?' filled':'');}const mb=document.getElementById('p3-merge-btn');if(mb)mb.disabled=p3Sel.length<2;}
@@ -1816,7 +1866,7 @@ function parSetEff(v){parEffChoice=v;['par-eff-yes','par-eff-no'].forEach(id=>{c
 function parCheck(){if(!parQ)return;const fields=[{id:'par-tn',key:'T',label:'T(n)'},{id:'par-pn',key:'P',label:'P(n)'},{id:'par-cn',key:'C',label:'C(n)'},{id:'par-tstar',key:'Tstar',label:'T*(n)'},{id:'par-sn',key:'S',label:'S(n)'},{id:'par-en',key:'E',label:'E(n)'}];const keys={T:'T',P:'P',C:'C',Tstar:'Tstar',S:'S',E:'E'};const expected={T:parQ.T,P:parQ.P,C:parQ.C,Tstar:parQ.Tstar,S:parQ.S,E:parQ.E};let allCorrect=true;let res='';fields.forEach(f=>{const ans=document.getElementById(f.id).value.trim();const exp=expected[f.key];const ok=complexEq(ans,exp)||ans.toLowerCase().replace(/\s/g,'')===exp.toLowerCase().replace(/\s/g,'');if(!ok)allCorrect=false;res+='<div style="margin-bottom:4px;"><span style="color:var(--text3);">'+f.label+': </span><span style="color:'+(ok?'var(--green)':'var(--red)')+'">'+ans+(ok?'':' ✗ ('+exp+')')+'</span></div>';});const optOk=parOptChoice===parQ.opt;const effOk=parEffChoice===parQ.eff;if(!optOk)allCorrect=false;if(!effOk)allCorrect=false;res+='<div style="margin-bottom:4px;"><span style="color:var(--text3);">Cost optimal: </span><span style="color:'+(optOk?'var(--green)':'var(--red)')+'">'+String(parOptChoice)+(optOk?'':' ✗ ('+String(parQ.opt)+')')+'</span></div>';res+='<div style="margin-bottom:4px;"><span style="color:var(--text3);">Cost efficient: </span><span style="color:'+(effOk?'var(--green)':'var(--red)')+'">'+String(parEffChoice)+(effOk?'':' ✗ ('+String(parQ.eff)+')')+'</span></div>';document.getElementById('par-results').innerHTML=res;if(allCorrect){parCorrect++;document.getElementById('par-correct').textContent=parCorrect;setFB('par-fb','ok','✓ All correct!');if(examActive)examTaskDone();}else{setFB('par-fb','err','✗ Some answers wrong — see results panel.');}}
 
 // ═══════════════════════════════════════════════════ QUIZ
-let quizCorrect=0,quizTotal=0,quizAnswered=false;
+let quizCorrect=0,quizTotal=0,quizAnswered=false,quizDoneIndices=new Set();
 const QUIZ_BANK=[
   ()=>{const syms=[{l:'A',f:5},{l:'B',f:2},{l:'C',f:8},{l:'D',f:1},{l:'E',f:3}];shuffle(syms);const sorted=[...syms].sort((a,b)=>a.f-b.f);const corrA=sorted[0],corrB=sorted[1];const wrong1=syms.filter(s=>s.l!==corrA.l&&s.l!==corrB.l).slice(0,2);const opts=[corrA.l+'+'+corrB.l+'='+(corrA.f+corrB.f),wrong1[0].l+'+'+corrB.l+'='+(wrong1[0].f+corrB.f),corrA.l+'+'+wrong1[1].l+'='+(corrA.f+wrong1[1].f),wrong1[0].l+'+'+wrong1[1].l+'='+(wrong1[0].f+wrong1[1].f)];return{topic:'Huffman',q:'Symbols: '+syms.map(s=>s.l+'='+s.f).join(', ')+'\n\nWhich pair to merge first?',opts,correct:0};},
   ()=>({topic:'Master Theorem',q:'T(n) = 4T(n/2) + n²\n\nWhich Master Theorem case applies?',opts:['Case 1 — recursion dominates','Case 2 — equal order','Case 3 — f(n) dominates','No Master Theorem applicable'],correct:2}),
@@ -1834,9 +1884,165 @@ const QUIZ_BANK=[
   ()=>({topic:'String Matching',q:'In Rabin-Karp, what is a "spurious hit"?',opts:['A match where tₛ = p but T[s+1..s+m] ≠ P','Any case where the pattern is found','When hash values overflow','When q is not prime'],correct:0}),
   ()=>({topic:'Recurrence',q:'T(n) = T(n/2) + 1 solves to:',opts:['O(n)','O(n log n)','O(log n)','O(1)'],correct:2}),
   ()=>({topic:'HT Phase 3',q:'In Hu-Tucker Phase 3, process which depth first?',opts:['Shallowest (closest to root)','Deepest level first','Any depth in any order','Only depth 1 nodes'],correct:1}),
+  // ── COMPLEXITY ──
+  ()=>({topic:'Complexity',q:'Big-O notation represents:',opts:['A tight bound on running time','An upper bound on running time','A lower bound on running time','The exact running time'],correct:1}),
+  ()=>({topic:'Complexity',q:'Big-Θ (theta) notation represents:',opts:['An upper bound','A lower bound','A tight bound (both upper and lower)','The average case only'],correct:2}),
+  ()=>({topic:'Complexity',q:'What is the simplified Big-O of f(n) = n² + 6n + n·log(n) + 1000?',opts:['O(n·log n)','O(n)','O(n²)','O(n³)'],correct:2}),
+  ()=>({topic:'Complexity',q:'O(1) + O(n) + O(n²) simplifies to:',opts:['O(n)','O(n²)','O(n³)','O(3n²)'],correct:1}),
+  ()=>({topic:'Complexity',q:'O(5n) simplifies to:',opts:['O(5n)','O(n)','O(n/5)','O(log n)'],correct:1}),
+  ()=>({topic:'Complexity',q:'Which ordering of complexity classes is correct (slowest to fastest growth)?',opts:['O(1) < O(log n) < O(n) < O(n log n) < O(n²) < O(2ⁿ) < O(n!)','O(1) < O(n) < O(log n) < O(n log n) < O(n²) < O(2ⁿ) < O(n!)','O(log n) < O(1) < O(n) < O(n²) < O(n log n) < O(2ⁿ) < O(n!)','O(1) < O(log n) < O(n) < O(n²) < O(n log n) < O(2ⁿ) < O(n!)'],correct:0}),
+  ()=>({topic:'Complexity',q:'If f(n) = Θ(g(n)), then f(n) = O(g(n)) is also true.',opts:['True','False'],correct:0}),
+  ()=>({topic:'Complexity',q:'Big-Ω gives an upper bound on the running time of an algorithm.',opts:['True','False'],correct:1}),
+  ()=>({topic:'Complexity',q:'The usual model of computation assumed in algorithm analysis (unless stated otherwise) is:',opts:['PRAM','RAM (Random Access Machine)','Turing Machine','CRCW'],correct:1}),
+  ()=>({topic:'Complexity',q:'f(n) = 2n + 6 is both O(n) and Ω(n), therefore it is Θ(n).',opts:['True','False'],correct:0}),
+  // ── RECURRENCES ──
+  ()=>({topic:'Recurrences',q:'The recurrence T(n) = T(n-1) + O(n) describes which algorithm?',opts:['Mergesort','Binary search','Recursive selection sort','Matrix multiplication'],correct:2}),
+  ()=>({topic:'Recurrences',q:'Which of the following CANNOT be solved by the Master Theorem directly?',opts:['T(n) = 2T(n/2) + n','T(n) = 9T(n/3) + n','T(n) = T(n-1) + n','T(n) = 3T(n/4) + n log n'],correct:2}),
+  ()=>({topic:'Recurrences',q:'For T(n) = 9T(n/3) + n, what is the asymptotic tight bound?',opts:['Θ(n)','Θ(n log n)','Θ(n²)','Θ(n³)'],correct:2}),
+  ()=>({topic:'Recurrences',q:'For T(n) = T(2n/3) + 1, what is the asymptotic tight bound?',opts:['Θ(1)','Θ(log n)','Θ(n)','Θ(n log n)'],correct:1}),
+  ()=>({topic:'Recurrences',q:'For T(n) = 3T(n/4) + n log n, which Master Theorem case applies?',opts:['Case 1 — watershed dominates','Case 2 — equal growth','Case 3 — driving function dominates','Master Theorem cannot be applied'],correct:2}),
+  ()=>({topic:'Recurrences',q:'In the Master Theorem, the "watershed function" is:',opts:['f(n)','n^(log_b a)','a·f(n/b)','T(n/b)'],correct:1}),
+  ()=>({topic:'Recurrences',q:'The substitution method (guess and induction) can be used when the Master Theorem does not apply.',opts:['True','False'],correct:0}),
+  ()=>({topic:'Recurrences',q:'When proving T(n) = 2T(⌊n/2⌋) + n is O(n log n) by induction, what is the recommended base case?',opts:['n = 0','n = 1','n = 2','n = 3'],correct:2}),
+  ()=>({topic:'Recurrences',q:'In Case 3 of the Master Theorem, what additional condition must f(n) satisfy?',opts:['f(n) must be monotone increasing','The regularity condition: a·f(n/b) ≤ c·f(n) for some c < 1','f(n) must be polynomial','f(n) must equal the watershed function'],correct:1}),
+  ()=>({topic:'Recurrences',q:'A recursion tree is a useful tool for guessing the solution before applying induction.',opts:['True','False'],correct:0}),
+  // ── GREEDY ──
+  ()=>({topic:'Greedy',q:'Which of the following is NOT a greedy algorithm?',opts:["Dijkstra's shortest path","Kruskal's MST","0/1 Knapsack","Huffman coding"],correct:2}),
+  ()=>({topic:'Greedy',q:"Dijkstra's algorithm requires which condition to guarantee correctness?",opts:['The graph must be undirected','All edge weights must be non-negative','The graph must be a DAG','The graph must be connected'],correct:1}),
+  ()=>({topic:'Greedy',q:'A greedy solution to the 0/1 Knapsack problem (e.g., by profit density) is always optimal.',opts:['True','False'],correct:1}),
+  ()=>({topic:'Greedy',q:'The core idea of a greedy algorithm is:',opts:['Try all possibilities and pick the best','Make the locally optimal choice at each step, hoping to reach the global optimum','Divide the problem into independent subproblems','Store and reuse solutions to overlapping subproblems'],correct:1}),
+  ()=>({topic:'Greedy',q:"Kruskal's and Prim's algorithms both solve:",opts:['Shortest path','Maximum flow','Minimum cost spanning tree','Topological sort'],correct:2}),
+  // ── DATA COMPRESSION (extended) ──
+  ()=>({topic:'Data Compression',q:'ASCII uses how many bits per character?',opts:['4','8','16','32'],correct:1}),
+  ()=>({topic:'Data Compression',q:'For a 5-symbol alphabet, how many bits are needed for a fixed-length code?',opts:['2','3','4','5'],correct:1}),
+  ()=>({topic:'Data Compression',q:'Why must compression codes be prefix-free?',opts:['To make the tree balanced','To ensure no codeword is a prefix of another, allowing unambiguous decoding without separators','To minimise tree depth','To ensure alphabetical ordering'],correct:1}),
+  ()=>({topic:'Data Compression',q:'Shannon-Fano coding uses which algorithm design paradigm?',opts:['Greedy (bottom-up)','Divide and Conquer (top-down)','Dynamic Programming','Brute Force'],correct:1}),
+  ()=>({topic:'Data Compression',q:'Huffman coding uses which algorithm design paradigm?',opts:['Divide and Conquer','Dynamic Programming','Greedy (bottom-up)','Brute Force'],correct:2}),
+  ()=>({topic:'Data Compression',q:'What is the time complexity of Huffman\'s algorithm when using a binary min-heap?',opts:['O(n)','O(n log n)','O(n²)','O(log n)'],correct:1}),
+  ()=>({topic:'Data Compression',q:'In Huffman coding, the two nodes merged first are always the ones with the highest frequencies.',opts:['True','False'],correct:1}),
+  ()=>({topic:'Data Compression',q:'Huffman coding always produces a full binary tree (every non-leaf has exactly two children).',opts:['True','False'],correct:0}),
+  ()=>({topic:'Data Compression',q:'Given symbols A=5, B=2, C=1, D=1, R=2, the first merge in Huffman coding combines:',opts:['A and B (5+2=7)','C and D (1+1=2)','B and R (2+2=4)','D and R (1+2=3)'],correct:1}),
+  ()=>({topic:'Data Compression',q:'The Ziv-Lempel model (used in gzip) represents the current text as:',opts:['A Huffman tree built on characters','A pointer back into a window of previously seen text','A fixed-length code for each symbol','An entropy-based probability distribution'],correct:1}),
+  ()=>({topic:'Data Compression',q:'In gzip, after the Ziv-Lempel model produces a symbol stream, what is done next?',opts:['The stream is output directly','Two Huffman codes are built on the frequency counts of distances and copy lengths','Shannon-Fano coding is applied','The stream is sorted and compressed again'],correct:1}),
+  ()=>({topic:'Data Compression',q:'Shannon-Fano always produces an optimal (minimum redundancy) code.',opts:['True','False'],correct:1}),
+  // ── HU-TUCKER (extended) ──
+  ()=>({topic:'Hu-Tucker',q:'In Hu-Tucker, two nodes are "compatible" if:',opts:['They are adjacent in the sequence','There is no square (leaf) node between them','Their combined weight is minimal','They are both circular nodes'],correct:1}),
+  ()=>({topic:'Hu-Tucker',q:'How many phases does the Hu-Tucker algorithm have?',opts:['2','3','4','1'],correct:1}),
+  ()=>({topic:'Hu-Tucker',q:'What does Phase 1 (Combination) of Hu-Tucker produce?',opts:['The final code words','The level (depth) of each leaf node','A tree built by greedily combining compatible nodes','The reconstruction of the alphabetic tree'],correct:2}),
+  ()=>({topic:'Hu-Tucker',q:'What does Phase 2 (Assignment) of Hu-Tucker determine?',opts:['Which nodes to merge next','The depth (level) of each original leaf node from the Phase 1 tree','The final binary codewords','Whether a cross-over link exists'],correct:1}),
+  ()=>({topic:'Hu-Tucker',q:'Why is Phase 3 (Reconstruction) necessary in Hu-Tucker?',opts:['To reduce the tree height','To eliminate cross-over links that would make the code non-alphabetic','To merge leftover nodes','To sort the codewords by frequency'],correct:1}),
+  ()=>({topic:'Hu-Tucker',q:'In Hu-Tucker Phase 1, if there is a tie in combined weight, the pair from the rightmost position is selected.',opts:['True','False'],correct:1}),
+  ()=>({topic:'Hu-Tucker',q:'A circular node in Hu-Tucker is an internal node that always has exactly two children.',opts:['True','False'],correct:0}),
+  ()=>({topic:'Hu-Tucker',q:'In Hu-Tucker Phase 3 (Reconstruction), how are pairs combined?',opts:['By weight, smallest first','Adjacent pairs with the same level q are merged into a parent at level q-1, working from max level to 0','Left-to-right regardless of level','Using the same compatible-pair rule as Phase 1'],correct:1}),
+  // ── STRING MATCHING (extended) ──
+  ()=>({topic:'String Matching',q:'In the string matching problem, a "valid shift" s means:',opts:['T[s .. s+m] matches P[1..m]','T[s+1 .. s+m] = P[1..m]','P starts at position s from the end of T','The pattern overlaps the text by s characters'],correct:1}),
+  ()=>({topic:'String Matching',q:'What is the worst-case time complexity of the Brute Force string matcher?',opts:['O(n)','O(m)','O((n - m + 1) · m)','O(n + m)'],correct:2}),
+  ()=>({topic:'String Matching',q:'In Rabin-Karp, Horner\'s rule is used to:',opts:['Sort the pattern characters','Compute the numeric hash value p of the pattern in O(m) time','Compute all t_s values simultaneously','Choose the prime q'],correct:1}),
+  ()=>({topic:'String Matching',q:'The Rabin-Karp rolling hash recurrence computes the next window hash in:',opts:['O(m)','O(log m)','O(1)','O(n)'],correct:2}),
+  ()=>({topic:'String Matching',q:'Why is modular arithmetic (mod q) used in Rabin-Karp?',opts:['To make the algorithm faster','To handle the case where hash values grow beyond the machine word size','To ensure the hash is always unique','To avoid computing Horner\'s rule'],correct:1}),
+  ()=>({topic:'String Matching',q:'In Rabin-Karp, if t_s ≡ p (mod q), then a valid shift is confirmed without further checking.',opts:['True','False'],correct:1}),
+  ()=>({topic:'String Matching',q:'In Rabin-Karp, h = d^(m-1) mod q is precomputed. What does subtracting T[s+1]·h do?',opts:['Adds the new low-order digit','Removes the contribution of the highest-order digit of the current window','Resets the hash to zero','Doubles the window size'],correct:1}),
+  ()=>({topic:'String Matching',q:'The best case for Brute Force string matching is O(1).',opts:['True','False'],correct:0}),
+  // ── DYNAMIC PROGRAMMING (extended) ──
+  ()=>({topic:'Dynamic Programming',q:'Dynamic programming differs from divide and conquer in that:',opts:['DP always uses recursion','Subproblems in DP are NOT independent — they overlap','Divide and conquer uses more memory','DP always works bottom-up'],correct:1}),
+  ()=>({topic:'Dynamic Programming',q:'What is the time complexity of the bottom-up 0/1 Knapsack DP algorithm?',opts:['O(n log C)','O(nC)','O(n²)','O(2ⁿ)'],correct:1}),
+  ()=>({topic:'Dynamic Programming',q:'The 0/1 Knapsack DP complexity O(nC) is called "pseudo-polynomial" because:',opts:['C is not part of the problem size; it\'s a value, not a count of items','It\'s actually O(n²) in disguise','n and C are always equal','The algorithm only works for small values of n'],correct:0}),
+  ()=>({topic:'Dynamic Programming',q:'A greedy approach (e.g., by profit density) is always optimal for the 0/1 Knapsack problem.',opts:['True','False'],correct:1}),
+  ()=>({topic:'Dynamic Programming',q:'In the 0/1 Knapsack recursive formulation, P(i, k) is defined as:',opts:['The maximum profit using all n items with capacity k','The maximum profit using items i through n with remaining capacity k','The minimum weight subset with profit at least k','The profit of item i with weight k'],correct:1}),
+  ()=>({topic:'Dynamic Programming',q:'Without memoization, the recursive Knapsack solution has time complexity:',opts:['O(nC)','O(n²)','O(2ⁿ) — exponential','O(n log n)'],correct:2}),
+  ()=>({topic:'Dynamic Programming',q:'Multiplying a (p×q) matrix by a (q×r) matrix costs how many scalar multiplications?',opts:['p·q','p·r','p·q·r','q·r'],correct:2}),
+  ()=>({topic:'Dynamic Programming',q:'In Matrix Chain Multiplication DP, m[i,j] represents:',opts:['The dimensions of matrix Ai','The minimum number of scalar multiplications to compute Ai..j','The index of the optimal split point','The maximum number of scalar multiplications'],correct:1}),
+  ()=>({topic:'Dynamic Programming',q:'The number of alternative parenthesizations of n matrices grows exponentially with n.',opts:['True','False'],correct:0}),
+  ()=>({topic:'Dynamic Programming',q:'For A1(10×100), A2(100×5), A3(5×50): computing ((A1·A2)·A3) requires how many scalar multiplications?',opts:['75,000','7,500','50,000','25,000'],correct:1}),
+  ()=>({topic:'Dynamic Programming',q:'The Longest Common Subsequence (LCS) DP algorithm has time complexity:',opts:['O(m + n)','O(m·n)','O(m²·n)','O(2^(m+n))'],correct:1}),
+  ()=>({topic:'Dynamic Programming',q:'Constructing the LCS from the b-table takes:',opts:['O(m·n)','O(m + n)','O(m²)','O(1)'],correct:1}),
+  ()=>({topic:'Dynamic Programming',q:'Memoization is a top-down approach that avoids recomputing subproblems by caching their results.',opts:['True','False'],correct:0}),
+  ()=>({topic:'Dynamic Programming',q:'Top-down memoization is preferred over bottom-up DP when:',opts:['All subproblems must be solved','Only a subset of subproblems need to be solved','The recursion stack is very deep','The table is small'],correct:1}),
+  ()=>({topic:'Dynamic Programming',q:'In memoization, a special initial value (e.g., -1) in a table entry signals:',opts:['The entry has been computed and is zero','The entry has not yet been filled in','The entry is invalid','The subproblem has no solution'],correct:1}),
+  ()=>({topic:'Dynamic Programming',q:'Bottom-up DP has lower overhead than memoization when all subproblems must be solved, because there is no recursion overhead.',opts:['True','False'],correct:0}),
+  // ── PARALLEL ALGORITHMS (extended) ──
+  ()=>({topic:'Parallel Algorithms',q:'PRAM stands for:',opts:['Parallel Random Access Machine','Parallel Read-Alter Machine','Processor RAM Architecture Model','Parallel Recursive Algorithm Method'],correct:0}),
+  ()=>({topic:'Parallel Algorithms',q:'In PRAM, SIMD means:',opts:['Single Input Multiple Data','Single Instruction Multiple Data — all PEs execute the same instruction on different data','Simultaneous Instruction Multiple Dispatch','Sequential Instruction Multiple Data'],correct:1}),
+  ()=>({topic:'Parallel Algorithms',q:'Which PRAM model is the MOST restrictive (most practical)?',opts:['CRCW','CREW','ERCW','EREW'],correct:3}),
+  ()=>({topic:'Parallel Algorithms',q:'Which PRAM model is the LEAST restrictive (least practical)?',opts:['EREW','CREW','CRCW','ERCW'],correct:2}),
+  ()=>({topic:'Parallel Algorithms',q:'EREW can simulate CRCW, but requires additional steps, so EREW generally has worse complexity.',opts:['True','False'],correct:0}),
+  ()=>({topic:'Parallel Algorithms',q:'The speedup S(n) of a parallel algorithm is defined as:',opts:['P(n) / T(n)','T*(n) / T(n)','T(n) / T*(n)','C(n) / T*(n)'],correct:1}),
+  ()=>({topic:'Parallel Algorithms',q:'The cost (work) C(n) of a parallel algorithm is:',opts:['T(n) + P(n)','T(n) / P(n)','P(n) × T(n)','T*(n) × P(n)'],correct:2}),
+  ()=>({topic:'Parallel Algorithms',q:'A parallel algorithm is cost efficient (but not necessarily cost optimal) when:',opts:['C(n) = T*(n)','C(n) is within a poly-logarithmic factor of T*(n), i.e., C(n)/T*(n) = O(log^k n)','E(n) = 1','S(n) = n'],correct:1}),
+  ()=>({topic:'Parallel Algorithms',q:'The parallel sum algorithm (EREW, T(n)=O(log n), P(n)=O(n)). What is C(n)?',opts:['O(n)','O(n log n)','O(log n)','O(n²)'],correct:1}),
+  ()=>({topic:'Parallel Algorithms',q:'The parallel sum algorithm (EREW, T(n) = O(log n)) is cost optimal since T*(n) = O(n).',opts:['True','False'],correct:1}),
+  ()=>({topic:'Parallel Algorithms',q:'The parallel CRCW search algorithm achieves T(n) = O(1) because:',opts:['It uses only one processor','All n PEs check their element simultaneously and write to "index" concurrently','The array is sorted first','It uses pointer jumping'],correct:1}),
+  ()=>({topic:'Parallel Algorithms',q:'The parallel CRCW search achieves C(n) = O(n). This makes it:',opts:['Cost efficient but not cost optimal','Cost optimal (since T*(n) = O(n))','Not work efficient','Faster than EREW search'],correct:1}),
+  ()=>({topic:'Parallel Algorithms',q:'Pointer jumping is used to process:',opts:['Arrays','Binary trees','Linked lists','Hash tables'],correct:2}),
+  ()=>({topic:'Parallel Algorithms',q:'Pointer jumping for prefix sum achieves T(n) = O(log n). What is a side effect?',opts:['The list is sorted','The structure of the linked list is destroyed','The algorithm uses O(n²) processors','The list is doubled in length'],correct:1}),
+  ()=>({topic:'Parallel Algorithms',q:'In the Euler Tour technique for computing tree node depths, each node is assigned how many PEs?',opts:['1','2','3','log n'],correct:2}),
+  ()=>({topic:'Parallel Algorithms',q:'The Euler Tour technique achieves depth computation in:',opts:['O(n) time','O(log n) time regardless of tree height','O(n²) time','O(depth) time'],correct:1}),
+  ()=>({topic:'Parallel Algorithms',q:'Parallel CRCW sorting can sort n elements in O(1) time using how many PEs?',opts:['n','n log n','(n² - n)/2','n²'],correct:2}),
+  ()=>({topic:'Parallel Algorithms',q:'The CRCW parallel sort (O(1) time, O(n²) processors) is considered cost optimal.',opts:['True','False'],correct:1}),
+  ()=>({topic:'Parallel Algorithms',q:"Batcher's EvenOddMergeSort (EREW) achieves what time complexity with n PEs?",opts:['O(log n)','O(log² n)','O(n log n)','O(n)'],correct:1}),
+  ()=>({topic:'Parallel Algorithms',q:"Batcher's EvenOddMergeSort is cost efficient but NOT cost optimal.",opts:['True','False'],correct:0}),
+  ()=>({topic:'Parallel Algorithms',q:'In a distributed system (as opposed to PRAM), processors communicate via:',opts:['Shared global memory','Explicit message passing','Shared registers','Broadcast instructions only'],correct:1}),
+  ()=>({topic:'Parallel Algorithms',q:'In a PRAM model, communication cost and synchronisation overhead are assumed to be negligible.',opts:['True','False'],correct:0}),
+  ()=>({topic:'Parallel Algorithms',q:'If a parallel algorithm performs worse than the sequential one even on a PRAM (which ignores communication costs), what does this imply?',opts:['The algorithm is still worth implementing on real hardware','It is meaningless to implement on a real machine','The algorithm needs more processors','The PRAM model is wrong'],correct:1}),
+  ()=>({topic:'Parallel Algorithms',q:'For the parallel sum: T(n) = Θ(log n), P(n) = n, T*(n) = Θ(n). What is E(n)?',opts:['1','log n','1 / log n','n / log n'],correct:2}),
+  ()=>({topic:'Parallel Algorithms',q:'CW (concurrent write) in PRAM with "reduction" policy means:',opts:['All PEs write the same value','Only the smallest-index PE writes','A reduction operation (e.g., min, max, sum) is applied to all written values','Writes are queued and applied one at a time'],correct:2}),
+  // ── MIXED ──
+  ()=>({topic:'Mixed',q:'Which of the following problems is solved using Dynamic Programming in this unit?',opts:['Minimum spanning tree','Shortest path (Dijkstra)','Longest Common Subsequence','Huffman coding'],correct:2}),
+  ()=>({topic:'Mixed',q:'Mergesort has recurrence T(n) = 2T(n/2) + n. By the Master Theorem, its complexity is:',opts:['O(n)','O(n log n)','O(n²)','O(log n)'],correct:1}),
+  ()=>({topic:'Mixed',q:'Which algorithm design paradigm does the 0/1 Knapsack DP solution use?',opts:['Greedy','Divide and conquer','Dynamic programming','Brute force'],correct:2}),
+  ()=>({topic:'Mixed',q:'The exam allows a double-sided handwritten or typed cheat sheet plus a non-programmable calculator.',opts:['True','False'],correct:0}),
+  ()=>({topic:'Mixed',q:'Students need to memorise all algorithm pseudocode for the exam.',opts:['True','False'],correct:1}),
+  ()=>({topic:'Mixed',q:'The fan-in algorithm on an EREW PRAM can compute all of the following EXCEPT:',opts:['The minimum of an array','The sum of an array','The maximum of an array','The median of an array'],correct:3}),
+  ()=>({topic:'Mixed',q:'Quicksort worst case is O(n²). This occurs when:',opts:['The pivot always splits the array evenly','The pivot is always the median element','The pivot is always the maximum or minimum element','The array is already sorted in reverse'],correct:2}),
+  ()=>({topic:'Mixed',q:'Dynamic Programming guarantees an optimal solution to the 0/1 Knapsack problem.',opts:['True','False'],correct:0}),
 ];
-function quizNext(){quizAnswered=false;const qFn=pick(QUIZ_BANK);const q=qFn();quizTotal++;document.getElementById('quiz-total').textContent=quizTotal;document.getElementById('quiz-topic-label').textContent=q.topic;document.getElementById('quiz-q').textContent=q.q;const optsEl=document.getElementById('quiz-opts');optsEl.innerHTML='';const fb=document.getElementById('quiz-fb');fb.style.display='none';document.getElementById('quiz-next-btn').style.display='none';const shuffledOpts=[...q.opts.map((o,i)=>({o,i}))];shuffle(shuffledOpts);shuffledOpts.forEach(({o,i})=>{const btn=document.createElement('button');btn.className='mc-opt';btn.textContent=o;btn.onclick=()=>{if(quizAnswered)return;quizAnswered=true;const correct=i===q.correct;btn.classList.add(correct?'correct':'wrong');optsEl.querySelectorAll('.mc-opt').forEach(b=>{b.classList.add('mc-locked');const origIdx=shuffledOpts.find(s=>s.o===b.textContent)?.i;if(origIdx===q.correct&&b!==btn)b.classList.add('correct');});if(correct){quizCorrect++;document.getElementById('quiz-correct').textContent=quizCorrect;setFBEl(fb,'ok','✓ Correct!');}else{setFBEl(fb,'err','✗ Wrong. Correct: '+q.opts[q.correct]);}fb.style.display='flex';document.getElementById('quiz-next-btn').style.display='block';};optsEl.appendChild(btn);});}
-function quizReset(){quizCorrect=0;quizTotal=0;document.getElementById('quiz-correct').textContent=0;document.getElementById('quiz-total').textContent=0;}
+function quizNext(){
+  quizAnswered=false;
+  // Pick from questions not yet correctly answered this session
+  const remaining=QUIZ_BANK.map((fn,idx)=>({fn,idx})).filter(({idx})=>!quizDoneIndices.has(idx));
+  if(remaining.length===0){
+    // All done — show completion and offer to restart
+    document.getElementById('quiz-topic-label').textContent='SESSION COMPLETE';
+    document.getElementById('quiz-q').textContent='You\'ve correctly answered all '+QUIZ_BANK.length+' questions this session!';
+    document.getElementById('quiz-opts').innerHTML='';
+    document.getElementById('quiz-fb').style.display='none';
+    document.getElementById('quiz-next-btn').style.display='none';
+    const restartBtn=document.createElement('button');
+    restartBtn.className='btn btn-primary';restartBtn.textContent='Start new session';
+    restartBtn.onclick=()=>{quizDoneIndices=new Set();quizNext();};
+    const optsEl=document.getElementById('quiz-opts');
+    optsEl.appendChild(restartBtn);
+    return;
+  }
+  const {fn:qFn,idx:qIdx}=pick(remaining);
+  const q=qFn();
+  quizTotal++;
+  document.getElementById('quiz-total').textContent=quizTotal;
+  document.getElementById('quiz-topic-label').textContent=q.topic+' — '+remaining.length+' left';
+  document.getElementById('quiz-q').textContent=q.q;
+  const optsEl=document.getElementById('quiz-opts');optsEl.innerHTML='';
+  const fb=document.getElementById('quiz-fb');fb.style.display='none';
+  document.getElementById('quiz-next-btn').style.display='none';
+  const shuffledOpts=[...q.opts.map((o,i)=>({o,i}))];shuffle(shuffledOpts);
+  shuffledOpts.forEach(({o,i})=>{
+    const btn=document.createElement('button');btn.className='mc-opt';btn.textContent=o;
+    btn.onclick=()=>{
+      if(quizAnswered)return;quizAnswered=true;
+      const correct=i===q.correct;
+      btn.classList.add(correct?'correct':'wrong');
+      optsEl.querySelectorAll('.mc-opt').forEach(b=>{
+        b.classList.add('mc-locked');
+        const origIdx=shuffledOpts.find(s=>s.o===b.textContent)?.i;
+        if(origIdx===q.correct&&b!==btn)b.classList.add('correct');
+      });
+      if(correct){quizCorrect++;quizDoneIndices.add(qIdx);document.getElementById('quiz-correct').textContent=quizCorrect;setFBEl(fb,'ok','✓ Correct! ('+(remaining.length-1)+' questions left)');}
+      else{setFBEl(fb,'err','✗ Wrong. Correct: '+q.opts[q.correct]+' — will come up again.');}
+      fb.style.display='flex';document.getElementById('quiz-next-btn').style.display='block';
+    };
+    optsEl.appendChild(btn);
+  });
+}
+function quizReset(){quizCorrect=0;quizTotal=0;quizDoneIndices=new Set();document.getElementById('quiz-correct').textContent=0;document.getElementById('quiz-total').textContent=0;quizNext();}
 
 // ═══════════════════════════════════════════════════ EXAM MODE
 let examActive=false,examQNum=0,examScore=0,examTotal=0,examSelectedTopics=new Set(),examTaskComplete=false;
