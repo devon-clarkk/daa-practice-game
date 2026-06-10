@@ -1149,24 +1149,37 @@ input[type=text]::placeholder,input[type=number]::placeholder{color:var(--text3)
       <div class="quiz-q" id="par-q" style="white-space:pre-line;">Press "New Problem" to begin.</div>
       <div class="panel-title mt2">Your answers</div>
       <div class="par-fields">
-        <div class="par-field"><label>T(n) — parallel time</label><input type="text" id="par-tn" placeholder="e.g. O(log n)"></div>
-        <div class="par-field"><label>P(n) — processors</label><input type="text" id="par-pn" placeholder="e.g. O(n)"></div>
-        <div class="par-field"><label>C(n) = P(n)×T(n)</label><input type="text" id="par-cn" placeholder="e.g. O(n log n)"></div>
-        <div class="par-field"><label>T*(n) — best sequential</label><input type="text" id="par-tstar" placeholder="e.g. O(n)"></div>
-        <div class="par-field"><label>S(n) = T*/T</label><input type="text" id="par-sn" placeholder="e.g. n/log n"></div>
-        <div class="par-field"><label>E(n) = T*/C</label><input type="text" id="par-en" placeholder="e.g. 1/log n"></div>
+        <div class="par-field"><label>T(n) — parallel time</label><div style="display:flex;gap:6px;align-items:center;">
+          <select id="par-tn" onchange="parCheckField('par-tn','T')"><option value="">—</option><option>O(1)</option><option>O(log n)</option><option>O(log² n)</option><option>O(√n)</option><option>O(n)</option><option>O(n log n)</option><option>O(n log² n)</option><option>O(n²)</option><option>O(n³)</option></select>
+          <span id="par-fb-tn" style="font-family:var(--mono);font-size:.75rem;"></span></div></div>
+        <div class="par-field"><label>P(n) — processors</label><div style="display:flex;gap:6px;align-items:center;">
+          <select id="par-pn" onchange="parCheckField('par-pn','P')"><option value="">—</option><option>O(1)</option><option>O(log n)</option><option>O(√n)</option><option>O(n)</option><option>O(n log n)</option><option>O(n log² n)</option><option>O(n²)</option><option>O(n³)</option></select>
+          <span id="par-fb-pn" style="font-family:var(--mono);font-size:.75rem;"></span></div></div>
+        <div class="par-field"><label>C(n) = P(n)×T(n)</label><div style="display:flex;gap:6px;align-items:center;">
+          <select id="par-cn" onchange="parCheckField('par-cn','C')"><option value="">—</option><option>O(1)</option><option>O(log n)</option><option>O(log² n)</option><option>O(n)</option><option>O(n log n)</option><option>O(n log² n)</option><option>O(n²)</option><option>O(n² log n)</option><option>O(n³)</option></select>
+          <span id="par-fb-cn" style="font-family:var(--mono);font-size:.75rem;"></span></div></div>
+        <div class="par-field"><label>T*(n) — best sequential</label><div style="display:flex;gap:6px;align-items:center;">
+          <select id="par-tstar" onchange="parCheckField('par-tstar','Tstar')"><option value="">—</option><option>O(1)</option><option>O(log n)</option><option>O(√n)</option><option>O(n)</option><option>O(n log n)</option><option>O(n log² n)</option><option>O(n²)</option><option>O(n³)</option></select>
+          <span id="par-fb-tstar" style="font-family:var(--mono);font-size:.75rem;"></span></div></div>
+        <div class="par-field"><label>S(n) = T*/T</label><div style="display:flex;gap:6px;align-items:center;">
+          <select id="par-sn" onchange="parCheckField('par-sn','S')"><option value="">—</option><option>1</option><option>log n</option><option>1/log n</option><option>n/log² n</option><option>n/log n</option><option>n</option><option>n log n</option><option>n²</option></select>
+          <span id="par-fb-sn" style="font-family:var(--mono);font-size:.75rem;"></span></div></div>
+        <div class="par-field"><label>E(n) = T*/C</label><div style="display:flex;gap:6px;align-items:center;">
+          <select id="par-en" onchange="parCheckField('par-en','E')"><option value="">—</option><option>1/n</option><option>log n/n</option><option>1/log² n</option><option>1/log n</option><option>1</option><option>log n</option><option>n</option></select>
+          <span id="par-fb-en" style="font-family:var(--mono);font-size:.75rem;"></span></div></div>
       </div>
-      <div class="row" style="margin-bottom:.75rem;">
+      <div class="row" style="margin-bottom:.75rem;align-items:center;">
         <span style="font-family:var(--mono);font-size:.82rem;color:var(--text2);">Cost optimal?</span>
         <button class="btn" id="par-yes" onclick="parSetOpt(true)">Yes</button>
         <button class="btn" id="par-no" onclick="parSetOpt(false)">No</button>
+        <span id="par-fb-opt" style="font-family:var(--mono);font-size:.75rem;"></span>
       </div>
-      <div class="row" style="margin-bottom:.75rem;">
+      <div class="row" style="margin-bottom:.75rem;align-items:center;">
         <span style="font-family:var(--mono);font-size:.82rem;color:var(--text2);">Cost efficient?</span>
         <button class="btn" id="par-eff-yes" onclick="parSetEff(true)">Yes</button>
         <button class="btn" id="par-eff-no" onclick="parSetEff(false)">No</button>
+        <span id="par-fb-eff" style="font-family:var(--mono);font-size:.75rem;"></span>
       </div>
-      <button class="btn btn-primary" onclick="parCheck()">Check all answers</button>
       <div class="fb info" id="par-fb" style="margin-top:.75rem;"></div>
     </div></div>
     <div><div class="panel">
@@ -1189,6 +1202,9 @@ input[type=text]::placeholder,input[type=number]::placeholder{color:var(--text3)
 <div class="page" id="page-quiz">
   <div class="page-title">Quick Quiz</div>
   <div class="page-sub">// multiple choice — tests concepts and algorithm knowledge across all topics</div>
+  <div style="max-width:700px;margin-bottom:.6rem;">
+    <button id="quiz-autonext-btn" onclick="quizToggleAutoNext()" style="padding:5px 14px;border-radius:6px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-family:var(--mono);font-size:.75rem;cursor:pointer;transition:all .15s;">Auto-next off</button>
+  </div>
   <div class="panel" style="max-width:700px;">
     <div class="exam-q-label" id="quiz-topic-label">—</div>
     <div class="quiz-q" id="quiz-q"></div>
@@ -1252,7 +1268,7 @@ function addLog(id,type,msg){const el=document.getElementById(id);if(!el)return;
 function parseSyms(raw){const parts=raw.split(',');const r=[];for(const p of parts){const m=p.trim().match(/^([^=]+)=(\d+(\.\d+)?)$/);if(m)r.push({label:m[1].trim(),freq:parseFloat(m[2])});}return r;}
 function mkNode(label,freq,isLeaf,left=null,right=null){return{id:Math.random(),label,freq,isLeaf,left,right};}
 function mkP3Node(label,depth,isLeaf,left=null,right=null){return{id:Math.random(),label,depth,isLeaf,left,right};}
-function normaliseComplexity(s){return s.replace(/\s+/g,'').toLowerCase().replace('theta','θ').replace('omega','ω').replace('Θ','θ').replace('Ω','ω').replace('O(','o(').replace(/×/g,'*').replace(/·/g,'*');}
+function normaliseComplexity(s){return s.replace(/\s+/g,'').toLowerCase().replace(/theta\(/g,'o(').replace(/omega\(/g,'o(').replace(/θ\(/g,'o(').replace(/ω\(/g,'o(').replace(/Θ\(/g,'o(').replace(/Ω\(/g,'o(').replace(/o\(/g,'o(').replace(/×/g,'*').replace(/·/g,'*');}
 function complexEq(a,b){return normaliseComplexity(a)===normaliseComplexity(b);}
 
 // ═══════════════════════════════════════════════════ NAV
@@ -1859,14 +1875,77 @@ const PAR_BANK=[
   {desc:'A parallel BROADCAST operation puts x into B[1..n] using n processors in T(n) = O(log n) steps.\n(EREW model)',T:'O(log n)',P:'O(n)',C:'O(n log n)',Tstar:'O(n)',S:'n/log n',E:'1/log n',opt:false,eff:true,model:'EREW'},
   {desc:'A parallel algorithm finds the PREFIX SUM of a linked list with n items.\nUses pointer jumping with n processors.',T:'O(log n)',P:'O(n)',C:'O(n log n)',Tstar:'O(n)',S:'n/log n',E:'1/log n',opt:false,eff:true,model:'EREW'},
 ];
-function parNew(){parQ=pick(PAR_BANK);parOptChoice=null;parEffChoice=null;parTotal++;document.getElementById('par-total').textContent=parTotal;document.getElementById('par-q').textContent=parQ.desc;['par-tn','par-pn','par-cn','par-tstar','par-sn','par-en'].forEach(id=>document.getElementById(id).value='');setFB('par-fb','info','Fill in all fields and submit.');['par-yes','par-no','par-eff-yes','par-eff-no'].forEach(id=>{const b=document.getElementById(id);if(b){b.style.borderColor='';b.style.background='';}});document.getElementById('par-results').textContent='Submit to see results.';}
-function parReset(){parQ=null;parCorrect=0;parTotal=0;document.getElementById('par-correct').textContent=0;document.getElementById('par-total').textContent=0;document.getElementById('par-q').textContent='Press "New Problem" to begin.';}
-function parSetOpt(v){parOptChoice=v;['par-yes','par-no'].forEach(id=>{const b=document.getElementById(id);if(b){b.style.borderColor='var(--border2)';b.style.background='';}});const chosen=v?document.getElementById('par-yes'):document.getElementById('par-no');if(chosen){chosen.style.borderColor='var(--amber)';chosen.style.background='var(--amber-dim)';}}
-function parSetEff(v){parEffChoice=v;['par-eff-yes','par-eff-no'].forEach(id=>{const b=document.getElementById(id);if(b){b.style.borderColor='var(--border2)';b.style.background='';}});const chosen=v?document.getElementById('par-eff-yes'):document.getElementById('par-eff-no');if(chosen){chosen.style.borderColor='var(--amber)';chosen.style.background='var(--amber-dim)';}}
-function parCheck(){if(!parQ)return;const fields=[{id:'par-tn',key:'T',label:'T(n)'},{id:'par-pn',key:'P',label:'P(n)'},{id:'par-cn',key:'C',label:'C(n)'},{id:'par-tstar',key:'Tstar',label:'T*(n)'},{id:'par-sn',key:'S',label:'S(n)'},{id:'par-en',key:'E',label:'E(n)'}];const keys={T:'T',P:'P',C:'C',Tstar:'Tstar',S:'S',E:'E'};const expected={T:parQ.T,P:parQ.P,C:parQ.C,Tstar:parQ.Tstar,S:parQ.S,E:parQ.E};let allCorrect=true;let res='';fields.forEach(f=>{const ans=document.getElementById(f.id).value.trim();const exp=expected[f.key];const ok=complexEq(ans,exp)||ans.toLowerCase().replace(/\s/g,'')===exp.toLowerCase().replace(/\s/g,'');if(!ok)allCorrect=false;res+='<div style="margin-bottom:4px;"><span style="color:var(--text3);">'+f.label+': </span><span style="color:'+(ok?'var(--green)':'var(--red)')+'">'+ans+(ok?'':' ✗ ('+exp+')')+'</span></div>';});const optOk=parOptChoice===parQ.opt;const effOk=parEffChoice===parQ.eff;if(!optOk)allCorrect=false;if(!effOk)allCorrect=false;res+='<div style="margin-bottom:4px;"><span style="color:var(--text3);">Cost optimal: </span><span style="color:'+(optOk?'var(--green)':'var(--red)')+'">'+String(parOptChoice)+(optOk?'':' ✗ ('+String(parQ.opt)+')')+'</span></div>';res+='<div style="margin-bottom:4px;"><span style="color:var(--text3);">Cost efficient: </span><span style="color:'+(effOk?'var(--green)':'var(--red)')+'">'+String(parEffChoice)+(effOk?'':' ✗ ('+String(parQ.eff)+')')+'</span></div>';document.getElementById('par-results').innerHTML=res;if(allCorrect){parCorrect++;document.getElementById('par-correct').textContent=parCorrect;setFB('par-fb','ok','✓ All correct!');if(examActive)examTaskDone();}else{setFB('par-fb','err','✗ Some answers wrong — see results panel.');}}
+function parNew(){parQ=pick(PAR_BANK);parOptChoice=null;parEffChoice=null;parFieldCorrect={};parTotal++;document.getElementById('par-total').textContent=parTotal;document.getElementById('par-q').textContent=parQ.desc;['par-tn','par-pn','par-cn','par-tstar','par-sn','par-en'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.disabled=false;}});parClearFeedback();['par-yes','par-no','par-eff-yes','par-eff-no'].forEach(id=>{const b=document.getElementById(id);if(b){b.style.borderColor='';b.style.background='';}});document.getElementById('par-results').textContent='';}
+let parFieldCorrect={};
+function parReset(){parQ=null;parCorrect=0;parTotal=0;parFieldCorrect={};document.getElementById('par-correct').textContent=0;document.getElementById('par-total').textContent=0;document.getElementById('par-q').textContent='Press "New Problem" to begin.';}
+function parClearFeedback(){['tn','pn','cn','tstar','sn','en'].forEach(k=>{const fb=document.getElementById('par-fb-'+k);if(fb){fb.textContent='';fb.style.color='';}});['par-fb-opt','par-fb-eff'].forEach(id=>{const el=document.getElementById(id);if(el){el.textContent='';el.style.color='';}});setFB('par-fb','info','');}
+function parCheckField(inputId,key){
+  if(!parQ)return;
+  const inp=document.getElementById(inputId);
+  const fbId='par-fb-'+inputId.replace('par-','');
+  const fb=document.getElementById(fbId);
+  if(!inp||!fb)return;
+  const ans=inp.value.trim();
+  if(!ans||ans==='—')return;
+  const exp=parQ[key];
+  const norm=s=>s.toLowerCase().replace(/\s+/g,'');
+  const ok=complexEq(ans,exp)||norm(ans)===norm(exp);
+  if(ok){
+    fb.textContent='✓';fb.style.color='var(--green)';
+    parFieldCorrect[key]=true;
+  } else {
+    fb.textContent='✗ ('+exp+')';fb.style.color='var(--red)';
+    parFieldCorrect[key]=false;
+  }
+  parCheckAllDone();
+}
+function parSetOpt(v){
+  parOptChoice=v;
+  ['par-yes','par-no'].forEach(id=>{const b=document.getElementById(id);if(b){b.style.borderColor='var(--border2)';b.style.color='';b.style.background='';}});
+  const chosen=v?document.getElementById('par-yes'):document.getElementById('par-no');
+  if(chosen){chosen.style.borderColor='var(--amber)';chosen.style.background='var(--amber-dim)';}
+  if(!parQ)return;
+  const ok=v===parQ.opt;
+  const fb=document.getElementById('par-fb-opt');
+  if(fb){fb.textContent=ok?'✓':'✗ ('+(parQ.opt?'Yes':'No')+')';fb.style.color=ok?'var(--green)':'var(--red)';}
+  parFieldCorrect['opt']=ok;
+  parCheckAllDone();
+}
+function parSetEff(v){
+  parEffChoice=v;
+  ['par-eff-yes','par-eff-no'].forEach(id=>{const b=document.getElementById(id);if(b){b.style.borderColor='var(--border2)';b.style.color='';b.style.background='';}});
+  const chosen=v?document.getElementById('par-eff-yes'):document.getElementById('par-eff-no');
+  if(chosen){chosen.style.borderColor='var(--amber)';chosen.style.background='var(--amber-dim)';}
+  if(!parQ)return;
+  const ok=v===parQ.eff;
+  const fb=document.getElementById('par-fb-eff');
+  if(fb){fb.textContent=ok?'✓':'✗ ('+(parQ.eff?'Yes':'No')+')';fb.style.color=ok?'var(--green)':'var(--red)';}
+  parFieldCorrect['eff']=ok;
+  parCheckAllDone();
+}
+function parCheckAllDone(){
+  const required=['T','P','C','Tstar','S','E','opt','eff'];
+  const allDone=required.every(k=>parFieldCorrect[k]===true);
+  if(allDone){
+    parCorrect++;document.getElementById('par-correct').textContent=parCorrect;
+    setFB('par-fb','ok','✓ All correct!');
+    if(examActive)examTaskDone();
+  }
+}
+function parCheck(){}
 
 // ═══════════════════════════════════════════════════ QUIZ
-let quizCorrect=0,quizTotal=0,quizAnswered=false,quizDoneIndices=new Set();
+let quizCorrect=0,quizTotal=0,quizAnswered=false,quizDoneIndices=new Set(),quizAutoNext=false;
+function quizToggleAutoNext(){
+  quizAutoNext=!quizAutoNext;
+  const btn=document.getElementById('quiz-autonext-btn');
+  if(btn){
+    btn.textContent=quizAutoNext?'Auto-next on':'Auto-next off';
+    btn.style.borderColor=quizAutoNext?'var(--accent)':'var(--border2)';
+    btn.style.color=quizAutoNext?'var(--accent)':'var(--text2)';
+    btn.style.background=quizAutoNext?'var(--accent-dim)':'var(--bg3)';
+  }
+}
 const QUIZ_BANK=[
   ()=>{const syms=[{l:'A',f:5},{l:'B',f:2},{l:'C',f:8},{l:'D',f:1},{l:'E',f:3}];shuffle(syms);const sorted=[...syms].sort((a,b)=>a.f-b.f);const corrA=sorted[0],corrB=sorted[1];const wrong1=syms.filter(s=>s.l!==corrA.l&&s.l!==corrB.l).slice(0,2);const opts=[corrA.l+'+'+corrB.l+'='+(corrA.f+corrB.f),wrong1[0].l+'+'+corrB.l+'='+(wrong1[0].f+corrB.f),corrA.l+'+'+wrong1[1].l+'='+(corrA.f+wrong1[1].f),wrong1[0].l+'+'+wrong1[1].l+'='+(wrong1[0].f+wrong1[1].f)];return{topic:'Huffman',q:'Symbols: '+syms.map(s=>s.l+'='+s.f).join(', ')+'\n\nWhich pair to merge first?',opts,correct:0};},
   ()=>({topic:'Master Theorem',q:'T(n) = 4T(n/2) + n²\n\nWhich Master Theorem case applies?',opts:['Case 1 — recursion dominates','Case 2 — equal order','Case 3 — f(n) dominates','No Master Theorem applicable'],correct:2}),
@@ -2035,8 +2114,9 @@ function quizNext(){
         const origIdx=shuffledOpts.find(s=>s.o===b.textContent)?.i;
         if(origIdx===q.correct&&b!==btn)b.classList.add('correct');
       });
-      if(correct){quizCorrect++;quizDoneIndices.add(qIdx);document.getElementById('quiz-correct').textContent=quizCorrect;setFBEl(fb,'ok','✓ Correct! ('+(remaining.length-1)+' questions left)');}
-      else{setFBEl(fb,'err','✗ Wrong. Correct: '+q.opts[q.correct]+' — will come up again.');}
+      if(correct){quizCorrect++;quizDoneIndices.add(qIdx);document.getElementById('quiz-correct').textContent=quizCorrect;setFBEl(fb,'ok','✓ Correct! ('+(remaining.length-1)+' questions left)');
+        if(quizAutoNext){fb.style.display='flex';setTimeout(()=>quizNext(),900);return;}
+      } else{setFBEl(fb,'err','✗ Wrong. Correct: '+q.opts[q.correct]+' — will come up again.');}
       fb.style.display='flex';document.getElementById('quiz-next-btn').style.display='block';
     };
     optsEl.appendChild(btn);
